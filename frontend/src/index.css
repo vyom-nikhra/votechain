@@ -206,3 +206,15 @@ html {
     transform: rotate(360deg);
   }
 }
+
+/* Autofill background fix for input fields */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  box-shadow: 0 0 0 1000px #fff inset !important;
+  -webkit-text-fill-color: #222 !important;
+  color: #222 !important;
+  caret-color: #222 !important;
+}

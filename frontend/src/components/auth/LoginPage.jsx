@@ -162,7 +162,7 @@ const LoginPage = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your Email"
-                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                     required
                   />
                 </div>
@@ -182,7 +182,7 @@ const LoginPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Enter your Password"
-                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                     required
                   />
                   <button

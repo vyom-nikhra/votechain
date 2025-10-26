@@ -38,13 +38,16 @@ const ElectionsList = () => {
   const [newElection, setNewElection] = useState({
     title: '',
     description: '',
+    department: '',
     electionType: 'simple',
     category: 'general',
     registrationStartTime: '',
     registrationEndTime: '',
     votingStartTime: '',
     votingEndTime: '',
-    candidates: [{ name: '', description: '', manifesto: '' }, { name: '', description: '', manifesto: '' }],
+    startDate: '',
+    endDate: '',
+    candidates: ['', ''],
     eligibleDepartments: [],
     eligibleYears: []
   });
@@ -69,10 +72,17 @@ const ElectionsList = () => {
       setNewElection({
         title: '',
         description: '',
+        department: '',
+        electionType: 'simple',
+        category: 'general',
+        registrationStartTime: '',
+        registrationEndTime: '',
+        votingStartTime: '',
+        votingEndTime: '',
         startDate: '',
         endDate: '',
         candidates: ['', ''],
-        department: '',
+        eligibleDepartments: [],
         eligibleYears: []
       });
       toast.success('Election created successfully!');
@@ -427,14 +437,13 @@ const ElectionsList = () => {
       {/* Create Election Modal */}
       {showCreateModal && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-4xl">
-            <h3 className="font-bold text-lg mb-4">Create New Election</h3>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="modal-box max-w-3xl bg-gray-950 border border-gray-700 shadow-2xl rounded-2xl px-8 py-10">
+            <h3 className="font-bold text-2xl mb-8 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Create New Election</h3>
+            <div className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Election Title *</span>
+                  <label className="label mb-3">
+                    <span className="label-text font-semibold text-gray-200">Election Title *</span>
                   </label>
                   <input
                     type="text"
@@ -442,19 +451,18 @@ const ElectionsList = () => {
                     value={newElection.title}
                     onChange={handleInputChange}
                     placeholder="Student Council Election 2024"
-                    className="input input-bordered"
+                    className="input input-bordered bg-gray-900 border-gray-700 rounded-xl text-white placeholder-gray-500 px-4 py-3"
                   />
                 </div>
-
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Department</span>
+                  <label className="label mb-3">
+                    <span className="label-text font-semibold text-gray-200">Department</span>
                   </label>
                   <select
                     name="department"
                     value={newElection.department}
                     onChange={handleInputChange}
-                    className="select select-bordered"
+                    className="select select-bordered bg-gray-900 border-gray-700 rounded-xl text-white px-4 py-3"
                   >
                     <option value="">All Departments</option>
                     <option value="Computer Science">Computer Science</option>
@@ -466,10 +474,9 @@ const ElectionsList = () => {
                   </select>
                 </div>
               </div>
-
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Description *</span>
+                <label className="label mb-3">
+                  <span className="label-text font-semibold text-gray-200">Description *</span>
                 </label>
                 <textarea
                   name="description"
@@ -477,70 +484,66 @@ const ElectionsList = () => {
                   onChange={handleInputChange}
                   rows="4"
                   placeholder="Describe the purpose and scope of this election..."
-                  className="textarea textarea-bordered"
+                  className="textarea textarea-bordered bg-gray-900 border-gray-700 rounded-xl text-white placeholder-gray-500 px-4 py-3 resize-none focus:ring-2 focus:ring-blue-500 shadow-lg"
                 />
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Start Date & Time *</span>
+                  <label className="label mb-3">
+                    <span className="label-text font-semibold text-gray-200">Start Date & Time *</span>
                   </label>
                   <input
                     type="datetime-local"
                     name="startDate"
                     value={newElection.startDate}
                     onChange={handleInputChange}
-                    className="input input-bordered"
+                    className="input input-bordered bg-gray-900 border-gray-700 rounded-xl text-white px-4 py-3"
                   />
                 </div>
-
                 <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">End Date & Time *</span>
+                  <label className="label mb-3">
+                    <span className="label-text font-semibold text-gray-200">End Date & Time *</span>
                   </label>
                   <input
                     type="datetime-local"
                     name="endDate"
                     value={newElection.endDate}
                     onChange={handleInputChange}
-                    className="input input-bordered"
+                    className="input input-bordered bg-gray-900 border-gray-700 rounded-xl text-white px-4 py-3"
                   />
                 </div>
               </div>
-
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Eligible Academic Years</span>
+                <label className="label mb-3">
+                  <span className="label-text font-semibold text-gray-200">Eligible Academic Years</span>
                 </label>
-                <div className="flex gap-2">
+                <div className="flex gap-6 flex-wrap">
                   {[1, 2, 3, 4].map(year => (
-                    <label key={year} className="cursor-pointer label">
+                    <label key={year} className="cursor-pointer label flex items-center gap-2">
                       <input
                         type="checkbox"
                         checked={newElection.eligibleYears.includes(year)}
                         onChange={() => handleYearToggle(year)}
-                        className="checkbox checkbox-primary"
+                        className="checkbox checkbox-primary w-4 h-4"
                       />
-                      <span className="label-text ml-2">Year {year}</span>
+                      <span className="label-text text-gray-300">Year {year}</span>
                     </label>
                   ))}
                 </div>
               </div>
-
               <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Candidates *</span>
+                <label className="label mb-3">
+                  <span className="label-text font-semibold text-gray-200">Candidates *</span>
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {newElection.candidates.map((candidate, index) => (
-                    <div key={index} className="flex gap-2">
+                    <div key={index} className="flex gap-4 items-center">
                       <input
                         type="text"
                         value={candidate}
                         onChange={(e) => handleCandidateChange(index, e.target.value)}
                         placeholder={`Candidate ${index + 1} name`}
-                        className="input input-bordered flex-1"
+                        className="input input-bordered bg-gray-900 border-gray-700 rounded-xl text-white placeholder-gray-500 flex-1 px-4 py-3"
                       />
                       {newElection.candidates.length > 2 && (
                         <button
@@ -556,7 +559,7 @@ const ElectionsList = () => {
                 </div>
                 <button
                   type="button"
-                  className="btn btn-outline btn-sm mt-2"
+                  className="btn btn-outline btn-sm mt-4 border-gray-700 text-gray-300"
                   onClick={addCandidate}
                 >
                   <FaPlus className="mr-2" />
@@ -564,10 +567,9 @@ const ElectionsList = () => {
                 </button>
               </div>
             </div>
-
-            <div className="modal-action">
+            <div className="modal-action mt-10 flex gap-6 justify-end">
               <button 
-                className="btn btn-success"
+                className="btn btn-success px-8 py-3 text-lg rounded-xl shadow"
                 onClick={handleCreateElection}
                 disabled={createElectionMutation.isLoading}
               >
@@ -579,7 +581,7 @@ const ElectionsList = () => {
                 Create Election
               </button>
               <button 
-                className="btn"
+                className="btn px-8 py-3 text-lg rounded-xl shadow border-gray-700 text-gray-300"
                 onClick={() => setShowCreateModal(false)}
               >
                 Cancel

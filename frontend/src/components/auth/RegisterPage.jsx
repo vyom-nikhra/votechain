@@ -127,7 +127,7 @@ const RegisterPage = () => {
                 </h1>
               </div>
               <p className="text-xl text-gray-300 mb-8 max-w-lg">
-                Be part of the democratic revolution. Create your account and start 
+                Be part of the
                 participating in secure, blockchain-powered elections.
               </p>
               <div className="grid gap-4 text-white/80 max-w-md mx-auto lg:mx-0">
@@ -165,7 +165,7 @@ const RegisterPage = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         placeholder="John"
-                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                         required
                       />
                     </div>
@@ -180,7 +180,7 @@ const RegisterPage = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         placeholder="Doe"
-                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                         required
                       />
                     </div>
@@ -198,7 +198,7 @@ const RegisterPage = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="john.doe@university.edu"
-                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                       required
                     />
                   </div>
@@ -215,7 +215,7 @@ const RegisterPage = () => {
                       value={formData.studentId}
                       onChange={handleChange}
                       placeholder="STU2024001"
-                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                       required
                     />
                   </div>
@@ -231,7 +231,7 @@ const RegisterPage = () => {
                         name="department"
                         value={formData.department}
                         onChange={handleChange}
-                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                         required
                       >
                         <option value="">Select Department</option>
@@ -253,7 +253,7 @@ const RegisterPage = () => {
                         name="year"
                         value={formData.year}
                         onChange={handleChange}
-                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                         required
                       >
                         <option value="">Select Year</option>
@@ -277,7 +277,7 @@ const RegisterPage = () => {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Minimum 6 characters"
-                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                       required
                     />
                     <button
@@ -300,7 +300,7 @@ const RegisterPage = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       placeholder="Re-enter your password"
-                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white placeholder-white"
                       required
                     />
                     <button
