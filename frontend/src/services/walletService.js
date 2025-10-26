@@ -222,12 +222,12 @@ class WalletService {
 
       // Create ethers provider
       const { ethers } = await import('ethers');
-      const provider = new ethers.providers.Web3Provider(this.provider);
+      const provider = new ethers.BrowserProvider(this.provider);
       const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, ERC721_ABI, provider);
 
       // Get number of NFTs owned by user
       const balance = await contract.balanceOf(userAddress);
-      const nftCount = balance.toNumber();
+      const nftCount = Number(balance);
 
       const nfts = [];
       
@@ -283,7 +283,7 @@ class WalletService {
       ];
 
       const { ethers } = await import('ethers');
-      const provider = new ethers.providers.Web3Provider(this.provider);
+      const provider = new ethers.BrowserProvider(this.provider);
       const contract = new ethers.Contract(contractAddress, ERC721_ABI, provider);
 
       const tokenURI = await contract.tokenURI(tokenId);

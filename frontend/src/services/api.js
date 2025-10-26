@@ -105,6 +105,8 @@ export const votingAPI = {
 // Analytics API
 export const analyticsAPI = {
   getDashboardStats: () => api.get('/analytics/dashboard'),
+  getOverviewStats: () => api.get('/analytics/overview-stats'),
+  getLiveResults: (electionId) => api.get(`/analytics/live-results/${electionId}`),
   getElectionStats: (electionId) => api.get(`/analytics/elections/${electionId}`),
   getUserStats: () => api.get('/analytics/user'),
   getSystemStats: () => api.get('/analytics/system'),

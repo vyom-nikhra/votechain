@@ -629,4 +629,82 @@ router.get('/election/:electionId/export', [authMiddleware], async (req, res) =>
   }
 });
 
+// @route   GET /api/votes/verify-nft/:voteId
+// @desc    Verify NFT certificate on blockchain
+// @access  Private
+router.get('/verify-nft/:voteId', authMiddleware, async (req, res) => {
+  try {
+    const { voteId } = req.params;
+
+    // Find the vote
+    const vote = await Vote.findById(voteId)
+      .populate('electionId', 'title')
+      .populate('userId', 'firstName lastName studentId');
+
+    if (!vote) {
+      return res.status(404).json({
+        success: false,
+        message: 'Vote not found'
+      });
+    }
+
+    // Check if user owns this vote
+    if (vote.userId._id.toString() !== req.user.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Unauthorized to verify this NFT'
+      });
+    }
+
+    if (!vote.nftTokenId) {
+      return res.status(400).json({
+        success: false,
+        message: 'No NFT certificate found for this vote'
+      });
+    }
+
+    try {
+      // Verify NFT exists on blockchain
+      const nftDetails = await blockchainService.verifyVotingNFT(vote.nftTokenId);
+      
+      res.json({
+        success: true,
+        message: 'NFT certificate verified successfully',
+        nftDetails: {
+          tokenId: vote.nftTokenId,
+          contractAddress: nftDetails.contractAddress,
+          owner: nftDetails.owner,
+          metadata: nftDetails.metadata,
+          transactionHash: vote.transactionHash,
+          blockNumber: nftDetails.blockNumber,
+          verified: true
+        },
+        voteDetails: {
+          id: vote._id,
+          election: vote.electionId.title,
+          voter: `${vote.userId.firstName} ${vote.userId.lastName}`,
+          studentId: vote.userId.studentId,
+          timestamp: vote.createdAt,
+          status: vote.status
+        }
+      });
+
+    } catch (blockchainError) {
+      console.error('Blockchain verification error:', blockchainError);
+      res.status(400).json({
+        success: false,
+        message: 'Failed to verify NFT on blockchain',
+        error: blockchainError.message
+      });
+    }
+
+  } catch (error) {
+    console.error('NFT verification error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during NFT verification'
+    });
+  }
+});
+
 export default router;

@@ -29,6 +29,27 @@ const ElectionsList = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Helper function to get election status
+  const getElectionStatus = (election) => {
+    const now = new Date();
+    const registrationStart = new Date(election.registrationStartTime);
+    const registrationEnd = new Date(election.registrationEndTime);
+    const votingStart = new Date(election.votingStartTime);
+    const votingEnd = new Date(election.votingEndTime);
+
+    if (now < registrationStart) {
+      return { status: 'upcoming', label: 'Upcoming', color: 'text-blue-500' };
+    } else if (now >= registrationStart && now <= registrationEnd) {
+      return { status: 'registration', label: 'Registration Open', color: 'text-yellow-500' };
+    } else if (now > registrationEnd && now < votingStart) {
+      return { status: 'pending', label: 'Pending Vote', color: 'text-orange-500' };
+    } else if (now >= votingStart && now <= votingEnd) {
+      return { status: 'active', label: 'Voting Active', color: 'text-green-500' };
+    } else {
+      return { status: 'completed', label: 'Completed', color: 'text-gray-500' };
+    }
+  };
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -69,10 +90,14 @@ const ElectionsList = () => {
       setNewElection({
         title: '',
         description: '',
-        startDate: '',
-        endDate: '',
-        candidates: ['', ''],
-        department: '',
+        electionType: 'simple',
+        category: 'general',
+        registrationStartTime: '',
+        registrationEndTime: '',
+        votingStartTime: '',
+        votingEndTime: '',
+        candidates: [{ name: '', description: '', manifesto: '' }, { name: '', description: '', manifesto: '' }],
+        eligibleDepartments: [],
         eligibleYears: []
       });
       toast.success('Election created successfully!');
@@ -104,9 +129,12 @@ const ElectionsList = () => {
     }));
   };
 
-  const handleCandidateChange = (index, value) => {
+  const handleCandidateChange = (index, field, value) => {
     const updatedCandidates = [...newElection.candidates];
-    updatedCandidates[index] = value;
+    updatedCandidates[index] = {
+      ...updatedCandidates[index],
+      [field]: value
+    };
     setNewElection(prev => ({
       ...prev,
       candidates: updatedCandidates
@@ -116,7 +144,7 @@ const ElectionsList = () => {
   const addCandidate = () => {
     setNewElection(prev => ({
       ...prev,
-      candidates: [...prev.candidates, '']
+      candidates: [...prev.candidates, { name: '', description: '', manifesto: '' }]
     }));
   };
 
@@ -143,18 +171,48 @@ const ElectionsList = () => {
 
   const handleCreateElection = () => {
     // Validation
-    if (!newElection.title || !newElection.description || !newElection.votingStartTime || !newElection.votingEndTime) {
-      toast.error('Please fill in all required fields');
+    if (!newElection.title || !newElection.description) {
+      toast.error('Please fill in title and description');
       return;
     }
 
-    if (newElection.candidates.some(c => !c.name || !c.description)) {
+    if (!newElection.registrationStartTime || !newElection.registrationEndTime) {
+      toast.error('Please set registration start and end times');
+      return;
+    }
+
+    if (!newElection.votingStartTime || !newElection.votingEndTime) {
+      toast.error('Please set voting start and end times');
+      return;
+    }
+
+    if (newElection.candidates.some(c => !c.name?.trim() || !c.description?.trim())) {
       toast.error('Please provide name and description for all candidates');
       return;
     }
 
-    if (new Date(newElection.votingStartTime) >= new Date(newElection.votingEndTime)) {
+    // Debug: Log the data being sent
+    console.log('Sending election data:', JSON.stringify(newElection, null, 2));
+    console.log('Candidates data:', newElection.candidates);
+
+    // Time validation
+    const regStart = new Date(newElection.registrationStartTime);
+    const regEnd = new Date(newElection.registrationEndTime);
+    const voteStart = new Date(newElection.votingStartTime);
+    const voteEnd = new Date(newElection.votingEndTime);
+
+    if (regStart >= regEnd) {
+      toast.error('Registration end time must be after start time');
+      return;
+    }
+
+    if (voteStart >= voteEnd) {
       toast.error('Voting end time must be after start time');
+      return;
+    }
+
+    if (regEnd > voteStart) {
+      toast.error('Voting must start after registration ends');
       return;
     }
 
@@ -448,15 +506,53 @@ const ElectionsList = () => {
 
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Department</span>
+                    <span className="label-text font-medium">Election Type *</span>
                   </label>
                   <select
-                    name="department"
-                    value={newElection.department}
+                    name="electionType"
+                    value={newElection.electionType}
                     onChange={handleInputChange}
                     className="select select-bordered"
                   >
-                    <option value="">All Departments</option>
+                    <option value="simple">Simple Voting</option>
+                    <option value="ranked">Ranked Choice</option>
+                    <option value="quadratic">Quadratic Voting</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Category *</span>
+                  </label>
+                  <select
+                    name="category"
+                    value={newElection.category}
+                    onChange={handleInputChange}
+                    className="select select-bordered"
+                  >
+                    <option value="general">General</option>
+                    <option value="student_council">Student Council</option>
+                    <option value="department">Department</option>
+                    <option value="club">Club/Society</option>
+                  </select>
+                </div>
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Eligible Departments</span>
+                  </label>
+                  <select
+                    name="eligibleDepartments"
+                    multiple
+                    value={newElection.eligibleDepartments}
+                    onChange={(e) => {
+                      const selected = Array.from(e.target.selectedOptions, option => option.value);
+                      setNewElection(prev => ({ ...prev, eligibleDepartments: selected }));
+                    }}
+                    className="select select-bordered"
+                  >
                     <option value="Computer Science">Computer Science</option>
                     <option value="Engineering">Engineering</option>
                     <option value="Business">Business</option>
@@ -484,12 +580,12 @@ const ElectionsList = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Start Date & Time *</span>
+                    <span className="label-text font-medium">Registration Start *</span>
                   </label>
                   <input
                     type="datetime-local"
-                    name="startDate"
-                    value={newElection.startDate}
+                    name="registrationStartTime"
+                    value={newElection.registrationStartTime}
                     onChange={handleInputChange}
                     className="input input-bordered"
                   />
@@ -497,12 +593,40 @@ const ElectionsList = () => {
 
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">End Date & Time *</span>
+                    <span className="label-text font-medium">Registration End *</span>
                   </label>
                   <input
                     type="datetime-local"
-                    name="endDate"
-                    value={newElection.endDate}
+                    name="registrationEndTime"
+                    value={newElection.registrationEndTime}
+                    onChange={handleInputChange}
+                    className="input input-bordered"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Voting Start *</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="votingStartTime"
+                    value={newElection.votingStartTime}
+                    onChange={handleInputChange}
+                    className="input input-bordered"
+                  />
+                </div>
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-medium">Voting End *</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    name="votingEndTime"
+                    value={newElection.votingEndTime}
                     onChange={handleInputChange}
                     className="input input-bordered"
                   />
@@ -532,25 +656,60 @@ const ElectionsList = () => {
                 <label className="label">
                   <span className="label-text font-medium">Candidates *</span>
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-4">
                   {newElection.candidates.map((candidate, index) => (
-                    <div key={index} className="flex gap-2">
-                      <input
-                        type="text"
-                        value={candidate}
-                        onChange={(e) => handleCandidateChange(index, e.target.value)}
-                        placeholder={`Candidate ${index + 1} name`}
-                        className="input input-bordered flex-1"
-                      />
-                      {newElection.candidates.length > 2 && (
-                        <button
-                          type="button"
-                          className="btn btn-error btn-square"
-                          onClick={() => removeCandidate(index)}
-                        >
-                          <FaTimes />
-                        </button>
-                      )}
+                    <div key={index} className="card bg-base-200 p-4">
+                      <div className="flex justify-between items-center mb-3">
+                        <h4 className="font-semibold">Candidate {index + 1}</h4>
+                        {newElection.candidates.length > 2 && (
+                          <button
+                            type="button"
+                            className="btn btn-error btn-sm"
+                            onClick={() => removeCandidate(index)}
+                          >
+                            <FaTimes />
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-3">
+                        <div className="form-control">
+                          <label className="label">
+                            <span className="label-text font-medium">Name *</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={candidate.name || ''}
+                            onChange={(e) => handleCandidateChange(index, 'name', e.target.value)}
+                            placeholder={`Enter candidate ${index + 1} name`}
+                            className="input input-bordered"
+                          />
+                        </div>
+                        <div className="form-control">
+                          <label className="label">
+                            <span className="label-text font-medium">Description *</span>
+                          </label>
+                          <textarea
+                            value={candidate.description || ''}
+                            onChange={(e) => handleCandidateChange(index, 'description', e.target.value)}
+                            placeholder={`Brief description of candidate ${index + 1}`}
+                            className="textarea textarea-bordered"
+                            rows="2"
+                          />
+                        </div>
+                        <div className="form-control">
+                          <label className="label">
+                            <span className="label-text font-medium">Manifesto</span>
+                          </label>
+                          <textarea
+                            value={candidate.manifesto || ''}
+                            onChange={(e) => handleCandidateChange(index, 'manifesto', e.target.value)}
+                            placeholder={`Campaign manifesto for candidate ${index + 1}`}
+                            className="textarea textarea-bordered"
+                            rows="3"
+                          />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>

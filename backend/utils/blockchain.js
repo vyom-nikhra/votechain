@@ -20,7 +20,9 @@ const VOTING_ABI = [
 const NFT_ABI = [
   "function mintVoterBadge(address to, uint256 electionId, string memory badgeType) external returns (uint256)",
   "function balanceOf(address owner) external view returns (uint256)",
-  "function tokenURI(uint256 tokenId) external view returns (string memory)"
+  "function tokenURI(uint256 tokenId) external view returns (string memory)",
+  "function ownerOf(uint256 tokenId) external view returns (address)",
+  "function getAddress() external view returns (address)"
 ];
 
 // Contract addresses on Local Hardhat Network
@@ -236,6 +238,60 @@ class BlockchainService {
     } catch (error) {
       console.error('Failed to get election from blockchain:', error);
       return null;
+    }
+  }
+
+  // Verify NFT certificate on blockchain
+  async verifyVotingNFT(tokenId) {
+    try {
+      if (!this.nftContract) {
+        throw new Error('NFT contract not initialized');
+      }
+
+      console.log('🔍 Verifying NFT token ID:', tokenId);
+
+      // Get token owner
+      const owner = await this.nftContract.ownerOf(tokenId);
+      
+      // Get token metadata URI
+      const tokenURI = await this.nftContract.tokenURI(tokenId);
+      
+      // Get current block number for verification
+      const currentBlock = await this.provider.getBlockNumber();
+
+      // Parse metadata if it's a valid JSON URI
+      let metadata = null;
+      try {
+        if (tokenURI.startsWith('data:application/json;base64,')) {
+          // Base64 encoded JSON
+          const base64Data = tokenURI.split(',')[1];
+          const jsonString = Buffer.from(base64Data, 'base64').toString('utf-8');
+          metadata = JSON.parse(jsonString);
+        } else if (tokenURI.startsWith('http')) {
+          // HTTP URL (would need to fetch in real implementation)
+          metadata = { uri: tokenURI };
+        } else {
+          // Raw JSON string
+          metadata = JSON.parse(tokenURI);
+        }
+      } catch (parseError) {
+        console.warn('Could not parse NFT metadata:', parseError.message);
+        metadata = { raw: tokenURI };
+      }
+
+      return {
+        tokenId: tokenId.toString(),
+        owner: owner,
+        contractAddress: await this.nftContract.getAddress(),
+        metadata: metadata,
+        blockNumber: currentBlock,
+        verified: true,
+        verificationTime: new Date().toISOString()
+      };
+
+    } catch (error) {
+      console.error('NFT verification failed:', error);
+      throw new Error(`Failed to verify NFT: ${error.message}`);
     }
   }
 }
