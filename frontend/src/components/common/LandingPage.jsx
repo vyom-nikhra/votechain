@@ -267,7 +267,7 @@ const LandingPage = () => {
             transition={{ duration: 0.8 }}
           >
             {/* Badge */}
-            <motion.div 
+            {/* <motion.div 
               className="badge bg-blue-600/30 border-blue-500/50 text-blue-300 backdrop-blur-md badge-lg mb-6 p-4 shadow-lg"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -275,7 +275,7 @@ const LandingPage = () => {
             >
               <HiSparkles className="mr-2" />
               Trusted by 500+ Universities Worldwide
-            </motion.div>
+            </motion.div> */}
 
             <h1 className="text-6xl md:text-8xl font-black mb-8 leading-tight">
               <span className="text-white drop-shadow-[0_4px_20px_rgba(255,255,255,0.3)]">Democracy</span>
@@ -590,7 +590,7 @@ const LandingPage = () => {
             
             <div className="text-gray-500">
               <p className="text-sm">
-                No credit card required • Setup in under 2 minutes • Cancel anytime
+                Your own decentralized Student Voting System
               </p>
             </div>
           </motion.div>
