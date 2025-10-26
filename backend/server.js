@@ -7,15 +7,15 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 
-// Import routes
+// Load environment variables FIRST before importing routes
+dotenv.config();
+
+// Import routes AFTER environment variables are loaded
 import authRoutes from './routes/auth.js';
 import electionRoutes from './routes/election.js';
 import voteRoutes from './routes/vote.js';
 import analyticsRoutes from './routes/analytics.js';
 import usersRoutes from './routes/users.js';
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const server = createServer(app);

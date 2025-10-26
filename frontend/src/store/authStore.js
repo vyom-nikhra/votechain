@@ -33,11 +33,12 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await authAPI.register(userData);
-          const { user, token } = response.data;
+          const { user } = response.data; // No token during registration
           
-          set({ user, token, isLoading: false });
-          toast.success(`Account created successfully! Welcome, ${user.firstName}!`);
-          return { success: true };
+          // Don't set user or token - they need email verification first
+          set({ isLoading: false });
+          toast.success(`Account created successfully! Please check ${user.email} for verification email.`);
+          return { success: true, requiresVerification: true };
         } catch (error) {
           const errorMessage = error.response?.data?.message || 'Registration failed';
           set({ error: errorMessage, isLoading: false });

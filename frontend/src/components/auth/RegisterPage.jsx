@@ -80,8 +80,9 @@ const RegisterPage = () => {
 
       const result = await register(userData);
       if (result.success) {
+
         toast.success('Account created successfully! Please login to continue.');
-        navigate('/login');
+
       }
       
       return result.success;

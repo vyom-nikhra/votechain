@@ -25,14 +25,27 @@ const loginLimiter = rateLimit({
   message: 'Too many login attempts, please try again later.',
 });
 
-// Email transporter (configure based on your email service)
+// Email transporter with hardcoded credentials
 const emailTransporter = nodemailer.createTransport({
-  service: 'gmail', // or your email service
+  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
+    user: 'aadipatel1911@gmail.com',
+    pass: 'bsqiynapalvrluhz'
   }
 });
+
+console.log('📧 Email transporter created for: aadipatel1911@gmail.com');
+
+// Test the connection asynchronously
+setTimeout(() => {
+  emailTransporter.verify((error, success) => {
+    if (error) {
+      console.log('❌ Email verification failed:', error.message);
+    } else {
+      console.log('✅ Email system ready');
+    }
+  });
+}, 2000);
 
 // Helper function to generate JWT
 const generateToken = (userId) => {
@@ -217,6 +230,14 @@ router.post('/login', [
       });
     }
 
+    // Check if email is verified
+    if (!user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please verify your email before logging in. Check your inbox for the verification link.'
+      });
+    }
+
     // Compare password
     const isPasswordValid = await user.comparePassword(password);
     
@@ -267,6 +288,9 @@ router.post('/login', [
 // @desc    Verify user email
 // @access  Public
 router.get('/verify-email/:token', async (req, res) => {
+  console.log('🔍 Email verification endpoint called');
+  console.log('Token received:', req.params.token);
+  
   try {
     const { token } = req.params;
 

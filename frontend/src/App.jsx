@@ -15,6 +15,7 @@ import Sidebar from './components/common/Sidebar';
 import LandingPage from './components/common/LandingPage';
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/RegisterPage';
+import EmailVerificationPage from './components/auth/EmailVerificationPage';
 import Dashboard from './components/dashboard/Dashboard';
 import ElectionsList from './components/voting/ElectionsList';
 import VotingPage from './components/voting/VotingPage';
@@ -113,6 +114,7 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/verify-email" element={<EmailVerificationPage />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           )}

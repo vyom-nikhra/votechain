@@ -133,6 +133,20 @@ const LoginPage = () => {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <form className="bg-white rounded-3xl p-8 shadow-2xl" onSubmit={handleSubmit}>
+              {/* Email Verification Reminder */}
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                  </svg>
+                  <div>
+                    <h4 className="text-sm font-semibold text-blue-800">Check Your Email</h4>
+                    <p className="text-xs text-blue-600">If you just registered, verify your email before logging in</p>
+                  </div>
+                </div>
+              </div>
+
               {/* Email Field */}
               <div className="flex flex-col mb-4">
                 <label className="text-gray-800 font-semibold mb-2">Email</label>
