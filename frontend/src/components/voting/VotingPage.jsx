@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import { electionsAPI, votingAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../common/Breadcrumbs';
 import { 
   FaVoteYea, 
   FaArrowLeft, 
@@ -208,6 +209,12 @@ const VotingPage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Breadcrumbs */}
+        <Breadcrumbs customItems={[
+          { label: 'Elections', href: '/elections' },
+          { label: election?.title || 'Vote' }
+        ]} />
+
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button 

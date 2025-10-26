@@ -80,8 +80,9 @@ const RegisterPage = () => {
 
       const result = await register(userData);
       if (result.success) {
-        // Redirect to login page since email verification is required
-        navigate('/login');
+
+        toast.success('Account created successfully! Please login to continue.');
+
       }
       
       return result.success;

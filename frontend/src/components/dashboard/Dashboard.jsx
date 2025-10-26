@@ -5,6 +5,7 @@ import { analyticsAPI, electionsAPI } from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 import walletService from '../../services/walletService';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../common/Breadcrumbs';
 import { 
   FaUser, 
   FaVoteYea, 
@@ -17,7 +18,10 @@ import {
   FaHistory,
   FaWallet,
   FaShieldAlt,
-  FaRocket
+  FaRocket,
+  FaUsers,
+  FaClock,
+  FaCheck
 } from 'react-icons/fa';
 
 const Dashboard = () => {
@@ -97,105 +101,123 @@ const Dashboard = () => {
         initial="hidden"
         animate="visible"
       >
+        {/* Breadcrumbs */}
+        <Breadcrumbs customItems={[{ label: 'Dashboard' }]} />
+
         {/* Header */}
         <motion.div 
           variants={itemVariants}
-          className="flex justify-between items-center mb-8"
+          className="mb-10"
         >
-          <div>
-            <h1 className="text-3xl font-bold text-base-content">
-              Welcome back, {user?.firstName || 'Student'}! 👋
-            </h1>
-            <p className="text-base-content/70 text-lg mt-2">
-              Ready to participate in democratic decision making?
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="btn btn-ghost btn-circle">
-              <FaBell className="text-xl" />
-            </button>
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                <div className="avatar placeholder">
-                  <div className="bg-primary text-primary-content rounded-full w-10">
-                    <FaUser />
-                  </div>
-                </div>
-              </div>
-              <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                <li><a onClick={() => navigate('/profile')}><FaUser className="mr-2" />Profile</a></li>
-                <li><a><FaCog className="mr-2" />Settings</a></li>
-                <li><a onClick={handleLogout}><FaSignOutAlt className="mr-2" />Logout</a></li>
-              </ul>
-            </div>
-          </div>
+          <h1 className="text-4xl md:text-5xl font-bold mb-3">
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              Welcome back, {user?.firstName || 'Student'}!
+            </span>
+            <span className="ml-2">👋</span>
+          </h1>
+          <p className="text-base-content/70 text-lg">
+            Ready to participate in democratic decision making?
+          </p>
         </motion.div>
 
         {/* Stats Cards */}
         <motion.div 
           variants={itemVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10"
         >
-          <div className="stat bg-base-100 rounded-lg shadow-lg">
-            <div className="stat-figure text-primary">
-              <FaVoteYea className="text-3xl" />
+          <div className="card bg-base-100 shadow-xl border-[0.5px] border-blue-500/20 hover:border-blue-400/50 hover:shadow-blue-500/20 transition-all duration-300 group">
+            <div className="card-body p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                    <FaVoteYea className="text-primary" />
+                    Total Elections
+                  </p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    {statsLoading ? '...' : stats?.totalElections || 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <FaVoteYea className="text-2xl text-blue-400" />
+                </div>
+              </div>
             </div>
-            <div className="stat-title">Total Elections</div>
-            <div className="stat-value text-primary">
-              {statsLoading ? '...' : stats?.totalElections || 0}
-            </div>
-            <div className="stat-desc">Available to vote</div>
           </div>
 
-          <div className="stat bg-base-100 rounded-lg shadow-lg">
-            <div className="stat-figure text-success">
-              <FaChartBar className="text-3xl" />
+          <div className="card bg-base-100 shadow-xl border-[0.5px] border-green-500/20 hover:border-green-400/50 hover:shadow-green-500/20 transition-all duration-300 group">
+            <div className="card-body p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                    <FaChartBar className="text-success" />
+                    Votes Cast
+                  </p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                    {statsLoading ? '...' : stats?.votescast || 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <FaChartBar className="text-2xl text-green-400" />
+                </div>
+              </div>
             </div>
-            <div className="stat-title">Votes Cast</div>
-            <div className="stat-value text-success">
-              {statsLoading ? '...' : stats?.votescast || 0}
-            </div>
-            <div className="stat-desc">Your participation</div>
           </div>
 
-          <div className="stat bg-base-100 rounded-lg shadow-lg">
-            <div className="stat-figure text-warning">
-              <FaCalendarAlt className="text-3xl" />
+          <div className="card bg-base-100 shadow-xl border-[0.5px] border-yellow-500/20 hover:border-yellow-400/50 hover:shadow-yellow-500/20 transition-all duration-300 group">
+            <div className="card-body p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                    <FaCalendarAlt className="text-warning" />
+                    Active Elections
+                  </p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                    {statsLoading ? '...' : stats?.activeElections || 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <FaCalendarAlt className="text-2xl text-yellow-400" />
+                </div>
+              </div>
             </div>
-            <div className="stat-title">Active Elections</div>
-            <div className="stat-value text-warning">
-              {statsLoading ? '...' : stats?.activeElections || 0}
-            </div>
-            <div className="stat-desc">Happening now</div>
           </div>
 
-          <div className="stat bg-base-100 rounded-lg shadow-lg">
-            <div className="stat-figure text-accent">
-              <FaTrophy className="text-3xl" />
+          <div className="card bg-base-100 shadow-xl border-[0.5px] border-pink-500/20 hover:border-pink-400/50 hover:shadow-pink-500/20 transition-all duration-300 group">
+            <div className="card-body p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                    <FaTrophy className="text-accent" />
+                    NFT Badges
+                  </p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                    {statsLoading ? '...' : stats?.nftBadges || 0}
+                  </p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                  <FaTrophy className="text-2xl text-pink-400" />
+                </div>
+              </div>
             </div>
-            <div className="stat-title">NFT Badges</div>
-            <div className="stat-value text-accent">
-              {statsLoading ? '...' : stats?.nftBadges || 0}
-            </div>
-            <div className="stat-desc">Earned rewards</div>
           </div>
         </motion.div>
 
         {/* Quick Actions */}
         <motion.div 
           variants={itemVariants}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10"
         >
           {/* Active Elections */}
-          <div className="card bg-base-100 shadow-xl">
+          <div className="card bg-base-100 shadow-xl border-[0.5px] border-blue-500/20 hover:border-purple-400/40 hover:shadow-blue-500/10 transition-all duration-300">
             <div className="card-body">
-              <h2 className="card-title flex items-center">
-                <FaVoteYea className="text-primary mr-2" />
-                Active Elections
+              <h2 className="card-title text-xl mb-4 flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg">
+                  <FaVoteYea className="text-primary" />
+                </div>
+                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Active Elections
+                </span>
               </h2>
-              <p className="text-base-content/70 mb-4">
-                Elections you can vote in right now
-              </p>
               
               {electionsLoading ? (
                 <div className="space-y-4">
@@ -210,39 +232,48 @@ const Dashboard = () => {
                   {electionsData.slice(0, 3).map((election) => {
                     const status = getElectionStatus(election);
                     return (
-                      <div key={election._id} className="alert alert-info">
-                        <FaCalendarAlt />
-                        <div>
-                          <h3 className="font-bold">{election.title}</h3>
-                          <div className="text-sm">
-                            <span className={`badge badge-${status.color} mr-2`}>
-                              {status.text}
-                            </span>
-                            • {election.totalVotes || 0} votes cast
+                      <div key={election._id} className="group border-[0.5px] border-gray-700 rounded-xl p-4 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 bg-base-100/50">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-base-content mb-2 truncate group-hover:text-primary transition-colors">{election.title}</h3>
+                            <div className="flex items-center gap-3 text-sm">
+                              <span className={`badge badge-sm ${
+                                status.status === 'active' 
+                                  ? 'badge-success' 
+                                  : status.status === 'upcoming'
+                                  ? 'badge-info'
+                                  : 'badge-neutral'
+                              }`}>
+                                {status.text}
+                              </span>
+                              <span className="text-base-content/60">
+                                {election.totalVotes || 0} votes
+                              </span>
+                            </div>
                           </div>
+                          {status.status === 'active' && (
+                            <button 
+                              className="btn btn-sm btn-primary hover:scale-105 transition-transform"
+                              onClick={() => navigate(`/voting/${election._id}`)}
+                            >
+                              Vote
+                            </button>
+                          )}
                         </div>
-                        {status.status === 'active' && (
-                          <button 
-                            className="btn btn-sm btn-primary"
-                            onClick={() => navigate(`/voting/${election._id}`)}
-                          >
-                            Vote Now
-                          </button>
-                        )}
                       </div>
                     );
                   })}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <FaVoteYea className="text-4xl text-base-content/30 mx-auto mb-2" />
-                  <p className="text-base-content/50">No active elections at the moment</p>
+                  <FaVoteYea className="text-4xl text-base-content/30 mx-auto mb-3" />
+                  <p className="text-base-content/60">No active elections at the moment</p>
                 </div>
               )}
               
-              <div className="card-actions justify-end mt-4">
+              <div className="card-actions justify-end mt-6">
                 <button 
-                  className="btn btn-outline"
+                  className="btn btn-outline btn-sm"
                   onClick={() => navigate('/elections')}
                 >
                   View All Elections
@@ -252,50 +283,58 @@ const Dashboard = () => {
           </div>
 
           {/* Recent Activity */}
-          <div className="card bg-base-100 shadow-xl">
+          <div className="card bg-base-100 shadow-xl border-[0.5px] border-green-500/20 hover:border-green-400/40 hover:shadow-green-500/10 transition-all duration-300">
             <div className="card-body">
-              <h2 className="card-title flex items-center">
-                <FaHistory className="text-success mr-2" />
-                Recent Activity
+              <h2 className="card-title text-xl mb-4 flex items-center gap-2">
+                <div className="p-2 bg-gradient-to-br from-success/20 to-success/10 rounded-lg">
+                  <FaHistory className="text-success" />
+                </div>
+                <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                  Recent Activity
+                </span>
               </h2>
-              <p className="text-base-content/70 mb-4">
-                Your recent voting activity
-              </p>
               
               {statsLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3].map(i => (
                     <div key={i} className="animate-pulse">
-                      <div className="h-12 bg-base-300 rounded-lg"></div>
+                      <div className="h-16 bg-base-200 rounded-lg"></div>
                     </div>
                   ))}
                 </div>
               ) : stats?.recentActivity && stats.recentActivity.length > 0 ? (
                 <div className="space-y-3">
                   {stats.recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 bg-base-200 rounded-lg">
-                      <div>
-                        <div className="font-semibold">Voted in {activity.electionTitle}</div>
-                        <div className="text-sm text-base-content/60">
-                          {new Date(activity.votedAt).toLocaleDateString()}
+                    <div key={index} className="group border-[0.5px] border-gray-700 rounded-xl p-3 hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 transition-all duration-300 bg-base-100/50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-base-content truncate group-hover:text-success transition-colors">Voted in {activity.electionTitle}</div>
+                          <div className="text-sm text-base-content/60 mt-1">
+                            {new Date(activity.votedAt).toLocaleDateString()}
+                          </div>
                         </div>
+                        <span className="badge badge-success badge-sm gap-1">
+                          <FaShieldAlt className="text-xs" />
+                          Verified
+                        </span>
                       </div>
-                      <div className="badge badge-success">Confirmed</div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <FaHistory className="text-4xl text-base-content/30 mx-auto mb-2" />
-                  <p className="text-base-content/50">No voting activity yet</p>
-                  <p className="text-sm text-base-content/40 mt-1">
+                  <FaHistory className="text-4xl text-base-content/30 mx-auto mb-3" />
+                  <p className="text-base-content/60 mb-2">No voting activity yet</p>
+                  <p className="text-sm text-base-content/50">
                     Start participating in elections to see your activity here
                   </p>
                 </div>
               )}
               
-              <div className="card-actions justify-end mt-4">
-                <button className="btn btn-outline">View All Activity</button>
+              <div className="card-actions justify-end mt-6">
+                <button className="btn btn-outline btn-sm">
+                  View All Activity
+                </button>
               </div>
             </div>
           </div>
@@ -304,40 +343,57 @@ const Dashboard = () => {
         {/* User Info Card */}
         <motion.div 
           variants={itemVariants}
-          className="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl"
+          className="card bg-base-100 border-[0.5px] border-gray-700 hover:border-purple-500/30 shadow-xl hover:shadow-2xl transition-all duration-300"
         >
           <div className="card-body">
-            <h2 className="card-title">Your Profile Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-              <div>
-                <div className="text-sm opacity-90">Student ID</div>
-                <div className="font-bold">{user?.studentId || 'Loading...'}</div>
+            <h2 className="card-title text-xl mb-6 flex items-center gap-2">
+              <div className="p-2 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg">
+                <FaUser className="text-primary" />
               </div>
-              <div>
-                <div className="text-sm opacity-90">Department</div>
-                <div className="font-bold">{user?.department || 'Loading...'}</div>
+              <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Profile Information
+              </span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-1">
+                <div className="text-sm text-base-content/60 mb-1">Student ID</div>
+                <div className="font-semibold text-base-content text-lg">{user?.studentId || 'Loading...'}</div>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Academic Year</div>
-                <div className="font-bold">{user?.year ? `Year ${user.year}` : 'Loading...'}</div>
+              <div className="space-y-1">
+                <div className="text-sm text-base-content/60 mb-1">Department</div>
+                <div className="font-semibold text-base-content text-lg">{user?.department || 'Loading...'}</div>
               </div>
-              <div>
-                <div className="text-sm opacity-90">Wallet Status</div>
-                <div className="font-bold">
+              <div className="space-y-1">
+                <div className="text-sm text-base-content/60 mb-1">Academic Year</div>
+                <div className="font-semibold text-base-content text-lg">{user?.year ? `Year ${user.year}` : 'Loading...'}</div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-sm text-base-content/60 mb-1">Wallet Status</div>
+                <div>
                   {user?.walletAddress ? (
-                    <span className="badge badge-success">Connected</span>
+                    <span className="badge badge-success gap-1">
+                      <FaShieldAlt className="text-xs" />
+                      Connected
+                    </span>
                   ) : (
-                    <span className="badge badge-warning">Not Connected</span>
+                    <span className="badge badge-warning gap-1">
+                      <FaShieldAlt className="text-xs" />
+                      Not Connected
+                    </span>
                   )}
                 </div>
               </div>
             </div>
             
             {!user?.walletAddress && (
-              <div className="mt-4">
+              <div className="divider my-4"></div>
+            )}
+            
+            {!user?.walletAddress && (
+              <div className="flex justify-end">
                 <button 
                   onClick={handleConnectWallet}
-                  className="btn btn-accent"
+                  className="btn btn-primary hover:scale-105 transition-transform"
                 >
                   <FaWallet className="mr-2" />
                   Connect Wallet

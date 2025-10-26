@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import walletService from '../../services/walletService';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../common/Breadcrumbs';
 import { 
   FaCubes,
   FaSearch,
@@ -72,6 +73,9 @@ const BlockchainExplorer = () => {
       transition={{ duration: 0.5 }}
       className="container mx-auto px-4 py-8 max-w-6xl"
     >
+      {/* Breadcrumbs */}
+      <Breadcrumbs customItems={[{ label: 'Blockchain Explorer' }]} />
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center gap-3">
           <FaCubes className="text-primary" />

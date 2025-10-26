@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { motion } from 'framer-motion';
 import { 
@@ -6,12 +6,19 @@ import {
   MdHowToVote, 
   MdPerson, 
   MdAdminPanelSettings,
-  MdAccountBalanceWallet 
+  MdAccountBalanceWallet,
+  MdLogout
 } from 'react-icons/md';
 import { FaCubes } from 'react-icons/fa';
 
 const Sidebar = () => {
-  const { user, isAdmin } = useAuthStore();
+  const { user, isAdmin, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const navItems = [
     {
@@ -96,7 +103,7 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="p-4 space-y-2 flex-1">
+      <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -118,16 +125,18 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Footer */}
+      {/* Logout Button */}
       <div className="p-4 border-t border-base-300">
-        <div className="text-center">
-          <p className="text-xs text-base-content/40">
-            VoteChain v1.0
-          </p>
-          <p className="text-xs text-base-content/40">
-            Powered by Blockchain
-          </p>
-        </div>
+        <button
+          onClick={handleLogout}
+          className="flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 w-full text-error hover:bg-error/10"
+        >
+          <MdLogout className="text-xl" />
+          <div className="flex-1 text-left">
+            <div className="font-medium">Logout</div>
+            <div className="text-xs opacity-70">Sign out</div>
+          </div>
+        </button>
       </div>
     </motion.aside>
   );

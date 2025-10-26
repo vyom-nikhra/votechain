@@ -11,7 +11,6 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import ErrorProvider from './context/ErrorContext';
  
 // Components
-import Navbar from './components/common/Navbar';
 import Sidebar from './components/common/Sidebar';
 import LandingPage from './components/common/LandingPage';
 import LoginPage from './components/auth/LoginPage';
@@ -67,7 +66,6 @@ function App() {
             <div className="flex">
               <Sidebar />
               <div className="flex-1 ml-64">
-                <Navbar />
                 <motion.main 
                   className="p-6"
                   initial={{ opacity: 0, y: 20 }}
@@ -75,7 +73,7 @@ function App() {
                   transition={{ duration: 0.3 }}
                 >
                   <Routes>
-                    <Route path="/" element={<Navigate to="/dashboard" />} />
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/dashboard" element={
                       <ProtectedRoute>
                         <Dashboard />
@@ -106,6 +104,7 @@ function App() {
                         <BlockchainExplorer />
                       </ProtectedRoute>
                     } />
+                    <Route path="*" element={<Navigate to="/dashboard" replace />} />
                   </Routes>
                 </motion.main>
               </div>

@@ -1,5 +1,3 @@
-import { FaSpinner } from 'react-icons/fa';
-
 const LoadingSpinner = ({ 
   size = 'md', 
   text = 'Loading...', 
@@ -7,16 +5,24 @@ const LoadingSpinner = ({
   overlay = false 
 }) => {
   const sizeClasses = {
-    sm: 'text-2xl',
-    md: 'text-4xl', 
-    lg: 'text-6xl'
+    sm: 'w-24 h-24',
+    md: 'w-32 h-32', 
+    lg: 'w-48 h-48'
   };
 
   const spinnerContent = (
-    <div className="flex flex-col items-center justify-center gap-4">
-      <FaSpinner className={`${sizeClasses[size]} animate-spin text-primary`} />
+    <div className="flex flex-col items-center justify-center gap-6">
+      <div className={`custom-loader ${sizeClasses[size]}`}>
+        <div className="loader__inner" />
+        <div className="loader__orbit">
+          <div className="loader__dot" />
+          <div className="loader__dot" />
+          <div className="loader__dot" />
+          <div className="loader__dot" />
+        </div>
+      </div>
       {text && (
-        <p className="text-base-content/70 text-lg font-medium">
+        <p className="text-slate-300 text-lg font-medium">
           {text}
         </p>
       )}
@@ -25,7 +31,7 @@ const LoadingSpinner = ({
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 bg-base-200 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-slate-950 flex items-center justify-center z-50">
         {spinnerContent}
       </div>
     );
@@ -33,7 +39,7 @@ const LoadingSpinner = ({
 
   if (overlay) {
     return (
-      <div className="absolute inset-0 bg-base-100/80 backdrop-blur-sm flex items-center justify-center z-10">
+      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-10">
         {spinnerContent}
       </div>
     );
