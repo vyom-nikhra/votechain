@@ -122,7 +122,7 @@ const LiveResults = () => {
                     </h3>
                     
                     <div className="space-y-4">
-                      {liveResults.results && liveResults.results.length > 0 ? (
+                      {liveResults.results && Array.isArray(liveResults.results) && liveResults.results.length > 0 ? (
                         liveResults.results.map((result, index) => (
                         <div key={result.candidate._id} className="flex items-center gap-4 p-4 bg-base-200 rounded-xl">
                           <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
@@ -165,13 +165,18 @@ const LiveResults = () => {
                           <FaTrophy className="text-4xl text-base-content/30 mx-auto mb-4" />
                           <h4 className="text-lg font-semibold mb-2">No Results Yet</h4>
                           <p className="text-base-content/60">
-                            Results will appear here as votes are cast
+                            {liveResults.summary?.totalVotes > 0 
+                              ? "Processing votes, results will appear shortly..." 
+                              : "Results will appear here as votes are cast"
+                            }
                           </p>
                           {liveResults.election && (
-                            <div className="mt-4 text-sm text-base-content/40">
+                            <div className="mt-4 text-sm text-base-content/40 space-y-1">
                               <p>Election Type: {liveResults.election.electionType}</p>
-                              <p>Total Votes: {liveResults.summary?.totalVotes}</p>
-                              <p>Total Candidates: {liveResults.summary?.totalCandidates}</p>
+                              <p>Total Votes: {liveResults.summary?.totalVotes || 0}</p>
+                              <p>Total Candidates: {liveResults.summary?.totalCandidates || 0}</p>
+                              <p>Results Array Length: {liveResults.results ? liveResults.results.length : 'undefined'}</p>
+                              <p>Has Results: {liveResults.results ? 'Yes' : 'No'}</p>
                             </div>
                           )}
                         </div>

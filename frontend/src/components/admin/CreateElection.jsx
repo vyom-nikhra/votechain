@@ -73,14 +73,34 @@ const CreateElection = () => {
       return;
     }
     
-    const validCandidates = formData.candidates.filter(c => c.name?.trim() && c.description?.trim());
+    // Ensure all candidates have proper data
+    const validCandidates = formData.candidates
+      .filter(c => c.name?.trim() && c.description?.trim())
+      .map(c => ({
+        name: c.name.trim(),
+        description: c.description.trim(),
+        manifesto: c.manifesto?.trim() || ''
+      }));
+      
     if (validCandidates.length < 2) {
       toast.error('At least 2 candidates with names and descriptions are required');
       return;
     }
     
+    // Validate dates
+    if (!formData.registrationStartDate || !formData.registrationEndDate || 
+        !formData.votingStartDate || !formData.votingEndDate) {
+      toast.error('All dates are required');
+      return;
+    }
+    
     const submitData = {
-      ...formData,
+      title: formData.title,
+      description: formData.description,
+      electionType: formData.electionType,
+      category: formData.category,
+      eligibleDepartments: formData.eligibleDepartments,
+      eligibleYears: formData.eligibleYears || [],
       candidates: validCandidates,
       registrationStartTime: formData.registrationStartDate,
       registrationEndTime: formData.registrationEndDate,
