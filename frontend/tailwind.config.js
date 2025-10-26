@@ -15,6 +15,7 @@ module.exports = {
         'slide-up': 'slideUp 0.3s ease-out',
         'marquee-horizontal': 'marquee-x var(--duration) infinite linear',
         'marquee-vertical': 'marquee-y var(--duration) linear infinite',
+        'pop-blob': 'pop-blob 5s infinite',
       },
       keyframes: {
         fadeIn: {
@@ -33,6 +34,16 @@ module.exports = {
           from: { transform: 'translateY(0)' },
           to: { transform: 'translateY(calc(-100% - var(--gap)))' },
         },
+        'pop-blob': {
+          '0%': { transform: 'scale(1)' },
+          '33%': { transform: 'scale(1.2)' },
+          '66%': { transform: 'scale(0.8)' },
+          '100%': { transform: 'scale(1)' },
+        },
+      },
+      filter: {
+        'blur-20': 'blur(20px)',
+        'blur-25': 'blur(25px)',
       },
     },
   },

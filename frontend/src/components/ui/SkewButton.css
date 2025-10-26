@@ -1,0 +1,64 @@
+/* From uiverse.io by @Ali-Tahmazi99 - Adapted for dark theme */
+.skew-button {
+  display: inline-block;
+  min-width: 150px;
+  height: 50px;
+  border-radius: 10px;
+  border: 1px solid #5a189a;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease-in;
+  z-index: 1;
+  background: transparent;
+  cursor: pointer;
+  padding: 0 20px;
+}
+
+.skew-button::before,
+.skew-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 100%;
+  transform: skew(15deg);
+  transition: all 0.5s;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.skew-button::before {
+  left: -10px;
+  background: #240046;
+}
+
+.skew-button::after {
+  right: -10px;
+  background: #5a189a;
+}
+
+.skew-button:hover::before,
+.skew-button:hover::after {
+  width: 58%;
+}
+
+.skew-button:hover .skew-button-text {
+  color: #e0aaff;
+  transition: 0.3s;
+}
+
+.skew-button-text {
+  color: #ffffff;
+  font-size: 18px;
+  transition: all 0.3s ease-in;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.skew-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
