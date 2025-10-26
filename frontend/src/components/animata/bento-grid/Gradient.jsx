@@ -10,7 +10,7 @@ export function MovingGradient({ children, className }) {
       transition={{ duration: 0.3 }}
     >
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20"
+        className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5"
         animate={{
           backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
         }}
@@ -51,13 +51,13 @@ export function BentoCard({
   return (
     <MovingGradient
       className={cn(
-        'group relative rounded-2xl border border-gray-700 bg-gray-800/50 p-6 backdrop-blur-sm transition-all hover:border-gray-600',
+        'group relative rounded-2xl border border-gray-700/50 bg-gray-900/30 backdrop-blur-md p-6 transition-all hover:border-blue-500/30 hover:shadow-lg hover:shadow-blue-500/5',
         className
       )}
     >
       <div className="flex h-full flex-col">
         {Icon && (
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gray-800/50 border border-gray-700/50 text-blue-400">
             <Icon className="h-6 w-6" />
           </div>
         )}

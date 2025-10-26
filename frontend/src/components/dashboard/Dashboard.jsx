@@ -109,15 +109,19 @@ const Dashboard = () => {
           variants={itemVariants}
           className="mb-10"
         >
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">
-            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              Welcome back, {user?.firstName || 'Student'}!
-            </span>
-            <span className="ml-2">👋</span>
-          </h1>
-          <p className="text-base-content/70 text-lg">
-            Ready to participate in democratic decision making?
-          </p>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-3 flex items-center gap-3">
+              <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl">
+                <FaUser className="text-2xl text-blue-400" />
+              </div>
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Welcome back, {user?.firstName}!
+              </span>
+            </h1>
+            <p className="text-base-content/70 text-lg">
+              Ready to participate in democratic decision making?
+            </p>
+          </div>
         </motion.div>
 
         {/* Stats Cards */}
@@ -406,7 +410,7 @@ const Dashboard = () => {
         {/* Blockchain Security Info */}
         <motion.div 
           variants={itemVariants}
-          className="card bg-base-100 shadow-xl mt-8"
+          className="card bg-base-100 shadow-xl border-[0.5px] border-purple-500/20 hover:border-purple-400/40 hover:shadow-purple-500/10 transition-all duration-300 mt-8"
         >
           <div className="card-body">
             <h3 className="card-title flex items-center gap-2">

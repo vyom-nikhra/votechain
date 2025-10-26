@@ -21,6 +21,7 @@ import { HiSparkles } from 'react-icons/hi2';
 import { cn } from '../../lib/utils';
 import BlurryBlob from '../animata/background/blurry-blob';
 import SkewButton from '../ui/SkewButton';
+import GlowButton from '../ui/GlowButton';
 import { BentoGrid, BentoCard } from '../animata/bento-grid/Gradient';
 import ClickSpark from '../ui/ClickSpark';
 import { PointerHighlight } from '../ui/PointerHighlight';
@@ -44,34 +45,48 @@ const LandingPage = () => {
     }
   });
 
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const offset = 80; // Account for navbar height
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   const features = [
     {
       icon: <FaShieldAlt className="text-5xl text-success" />,
       title: "Military-Grade Security",
       description: "Blockchain-powered cryptographic protection ensures your vote is immutable and tamper-proof",
       color: "success",
-      badge: "🛡️ Secure"
+      badge: "Secure"
     },
     {
       icon: <FaChartLine className="text-5xl text-info" />,
       title: "Real-time Transparency", 
       description: "Watch live voting results, analytics, and participation metrics in real-time dashboards",
       color: "info",
-      badge: "👁️ Transparent"
+      badge: "Transparent"
     },
     {
       icon: <FaUsers className="text-5xl text-warning" />,
       title: "Democratic Governance",
       description: "Participate in university decisions, student council elections, and policy voting",
       color: "warning",
-      badge: "🗳️ Democratic"
+      badge: "Democratic"
     },
     {
       icon: <FaRocket className="text-5xl text-error" />,
       title: "Lightning Fast Results",
       description: "Get instant election results and real-time updates for active civic participation",
       color: "error",
-      badge: "⚡ Fast"
+      badge: "Fast"
     }
   ];
 
@@ -88,7 +103,7 @@ const LandingPage = () => {
       role: "Student Council President",
       university: "MIT",
       content: "VoteChain revolutionized our student elections. The transparency and security gave everyone confidence in the results.",
-      avatar: "👩‍🎓",
+      avatar: "SC",
       rating: 5
     },
     {
@@ -96,7 +111,7 @@ const LandingPage = () => {
       role: "Dean of Students",
       university: "Stanford University", 
       content: "Implementation was seamless. Students love the real-time results and the NFT rewards system increased participation by 300%.",
-      avatar: "👨‍🏫",
+      avatar: "MR",
       rating: 5
     },
     {
@@ -104,7 +119,7 @@ const LandingPage = () => {
       role: "CS Student",
       university: "UC Berkeley",
       content: "Finally, a voting system that's as advanced as the technology we're studying. The blockchain transparency is incredible.",
-      avatar: "👨‍💻",
+      avatar: "AT",
       rating: 5
     }
   ];
@@ -167,23 +182,59 @@ const LandingPage = () => {
           </div>
           
           <div className="navbar-center hidden lg:flex">
-            <ul className="menu menu-horizontal px-1 space-x-2">
-              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">Features</a></li>
-              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">Pricing</a></li>
-              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">About</a></li>
-              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">Contact</a></li>
+            <ul className="menu menu-horizontal px-1 space-x-4">
+              <li>
+                <button 
+                  onClick={() => scrollToSection('hero')} 
+                  className="btn btn-sm btn-ghost text-gray-300 hover:text-white hover:bg-gray-800"
+                >
+                  Home
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => scrollToSection('features')} 
+                  className="btn btn-sm btn-ghost text-gray-300 hover:text-white hover:bg-gray-800"
+                >
+                  Features
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => scrollToSection('testimonials')} 
+                  className="btn btn-sm btn-ghost text-gray-300 hover:text-white hover:bg-gray-800"
+                >
+                  Testimonials
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => scrollToSection('cta')} 
+                  className="btn btn-sm btn-ghost text-gray-300 hover:text-white hover:bg-gray-800"
+                >
+                  About
+                </button>
+              </li>
+              <li>
+                <button 
+                  onClick={() => scrollToSection('footer')} 
+                  className="btn btn-sm btn-ghost text-gray-300 hover:text-white hover:bg-gray-800"
+                >
+                  Contact
+                </button>
+              </li>
             </ul>
           </div>
           
-          <div className="navbar-end space-x-2">
+          <div className="navbar-end space-x-3">
             <Link to="/login" className="btn btn-sm btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">
               <FaLock className="mr-2" />
               Sign In
             </Link>
-            <Link to="/register" className="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white border-none shadow-lg shadow-blue-500/30">
-              <FaRocket className="mr-2" />
-              Get Started
-              <FaArrowRight className="ml-2" />
+            <Link to="/register" className="inline-block">
+              <GlowButton>
+                Get Started
+              </GlowButton>
             </Link>
           </div>
         </motion.div>
@@ -198,11 +249,11 @@ const LandingPage = () => {
     >
       <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-x-hidden">
       {/* Hero Section */}
-      <section className="hero min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black relative overflow-hidden">
+      <section id="hero" className="hero min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black relative overflow-hidden pt-24">
         {/* BlurryBlob Background Animation */}
         <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
           <BlurryBlob
-            className="opacity-70"
+            className="opacity-70 scale-150"
             firstBlobColor="bg-blue-500"
             secondBlobColor="bg-purple-500"
           />
@@ -228,19 +279,22 @@ const LandingPage = () => {
 
             <h1 className="text-6xl md:text-8xl font-black mb-8 leading-tight">
               <span className="text-white drop-shadow-[0_4px_20px_rgba(255,255,255,0.3)]">Democracy</span>
-              <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(147,51,234,0.5)]">
+              <br />
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(147,51,234,0.5)]">
                 Reimagined
               </span>
             </h1>
             
             <div className="text-xl md:text-2xl mb-12 text-gray-200 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
               Blockchain-powered voting platform.{' '}
-              <PointerHighlight
-                rectangleClassName="border-blue-500"
-                pointerClassName="text-blue-500"
-              >
-                <span className="text-blue-300 font-semibold">Secure, transparent, and instant</span>
-              </PointerHighlight>.
+              <span className="inline-block">
+                <PointerHighlight
+                  rectangleClassName="border-blue-500"
+                  pointerClassName="text-blue-500"
+                >
+                  <span className="text-blue-300 font-semibold">Secure, transparent, and instant</span>
+                </PointerHighlight>
+              </span>.
             </div>
             
             <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-12">
@@ -280,15 +334,17 @@ const LandingPage = () => {
       </section>
 
       {/* Features Section - Bento Grid */}
-      <section className="py-20 bg-gray-900">
-        <div className="container mx-auto px-4">
+      <section id="features" className="py-20 bg-gradient-to-br from-gray-950 via-gray-900 to-black relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.15),transparent_60%)]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(59,130,246,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(59,130,246,0.05)_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
+        <div className="container mx-auto px-4 relative z-10">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
               Why Choose VoteChain?
             </h2>
             <p className="text-xl text-gray-400 max-w-2xl mx-auto">
@@ -388,7 +444,7 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-gray-950 relative overflow-hidden">
+      <section id="testimonials" className="py-24 bg-gray-950 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <motion.div
             className="text-center mb-16"
@@ -396,7 +452,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">
               What Our Users Say
             </h2>
             <p className="text-xl text-gray-400">
@@ -408,12 +464,16 @@ const LandingPage = () => {
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
-                className="card bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 w-96 mx-4"
+                className="card bg-gradient-to-br from-gray-900/80 to-gray-800/80 border border-blue-500/20 hover:border-purple-500/40 shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 w-96 mx-4 backdrop-blur-sm"
                 whileHover={{ y: -5, scale: 1.02 }}
               >
                 <div className="card-body p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    <div className="text-4xl">{testimonial.avatar}</div>
+                    <div className="avatar placeholder">
+                      <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-blue-400 rounded-full w-12 h-12 flex items-center justify-center border border-blue-500/30">
+                        <span className="text-lg font-bold">{testimonial.avatar}</span>
+                      </div>
+                    </div>
                     <div>
                       <h3 className="font-bold text-white text-lg">{testimonial.name}</h3>
                       <p className="text-sm text-gray-400">{testimonial.role}</p>
@@ -448,7 +508,7 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">
               Ready to Transform Democracy?
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
@@ -483,9 +543,9 @@ const LandingPage = () => {
               whileHover={{ y: -5 }}
             >
               <div className="p-6 z-10">
-                <h3 className="text-2xl font-bold text-white mb-2">Global Reach</h3>
+                <h3 className="text-2xl font-bold text-white mb-2">Redefining Democracy</h3>
                 <p className="text-gray-400 text-sm">
-                  Trusted by universities and organizations across 50+ countries
+                  Trusted by universities and organizations
                 </p>
               </div>
               
@@ -497,9 +557,9 @@ const LandingPage = () => {
                 <div className="flex items-center justify-between text-sm text-gray-400 bg-gray-900/80 backdrop-blur-sm p-4 rounded-lg border border-gray-700">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
-                    <span>Live worldwide</span>
+                    <span>VoteChain</span>
                   </div>
-                  <div className="text-white font-semibold">500+ Active Locations</div>
+                  <div className="text-white font-semibold">Decentralized Student Voting</div>
                 </div>
               </div>
             </motion.div>
@@ -530,7 +590,7 @@ const LandingPage = () => {
             
             <div className="text-gray-500">
               <p className="text-sm">
-                ✨ No credit card required • 🔒 Setup in under 2 minutes • 🎯 Cancel anytime
+                No credit card required • Setup in under 2 minutes • Cancel anytime
               </p>
             </div>
           </motion.div>
@@ -538,7 +598,7 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-950 border-t border-gray-800">
+      <footer id="footer" className="bg-gray-950 border-t border-gray-800">
         <div className="container mx-auto px-4 py-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             {/* Brand Column */}

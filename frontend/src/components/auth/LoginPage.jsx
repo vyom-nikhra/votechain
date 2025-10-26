@@ -162,7 +162,7 @@ const LoginPage = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Enter your Email"
-                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
                     required
                   />
                 </div>
@@ -182,7 +182,7 @@ const LoginPage = () => {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Enter your Password"
-                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                    className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-white"
                     required
                   />
                   <button
@@ -255,24 +255,6 @@ const LoginPage = () => {
                   </svg>
                   <span className="text-sm font-medium text-gray-800">Apple</span>
                 </button>
-              </div>
-
-              {/* Demo Accounts */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-                <h4 className="font-semibold text-sm mb-3 flex items-center gap-2 text-gray-800">
-                  <MdSchool className="text-blue-500" />
-                  Demo Accounts
-                </h4>
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">👨‍🎓 Demo Student:</span>
-                    <code className="bg-white px-2 py-1 rounded text-gray-800">student@demo.com</code>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">👩‍💼 Demo Admin:</span>
-                    <code className="bg-white px-2 py-1 rounded text-gray-800">admin@demo.com</code>
-                  </div>
-                </div>
               </div>
             </form>
           </motion.div>

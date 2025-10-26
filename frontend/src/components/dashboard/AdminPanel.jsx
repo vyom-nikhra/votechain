@@ -570,7 +570,7 @@ const AdminPanel = () => {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="card bg-base-100 shadow-xl">
+              <div className="card bg-base-100 shadow-xl border-[0.5px] border-cyan-500/20 hover:border-cyan-400/40 hover:shadow-cyan-500/10 transition-all duration-300">
                 <div className="card-body">
                   <h3 className="card-title">Quick Actions</h3>
                   <div className="space-y-3">
@@ -600,7 +600,7 @@ const AdminPanel = () => {
                 </div>
               </div>
 
-              <div className="card bg-base-100 shadow-xl">
+              <div className="card bg-base-100 shadow-xl border-[0.5px] border-green-500/20 hover:border-green-400/40 hover:shadow-green-500/10 transition-all duration-300">
                 <div className="card-body">
                   <h3 className="card-title">Recent Activity</h3>
                   <div className="space-y-3">
@@ -666,7 +666,7 @@ const AdminPanel = () => {
             </div>
 
             {/* Users Table */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow-xl border-[0.5px] border-blue-500/20 hover:border-blue-400/40 hover:shadow-blue-500/10 transition-all duration-300">
               <div className="card-body">
                 <div className="overflow-x-auto">
                   <table className="table">

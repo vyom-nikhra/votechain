@@ -232,7 +232,7 @@ const VotingPage = () => {
         </div>
 
         {/* Election Info Card */}
-        <div className="card bg-base-100 shadow-xl mb-8">
+        <div className="card bg-base-100 shadow-xl border-[0.5px] border-cyan-500/20 hover:border-cyan-400/40 hover:shadow-cyan-500/10 transition-all duration-300 mb-8">
           <div className="card-body">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center gap-3">
@@ -349,7 +349,7 @@ const VotingPage = () => {
         </div>
 
         {/* Election Details */}
-        <div className="card bg-base-100 shadow-xl mb-8">
+        <div className="card bg-base-100 shadow-xl border-[0.5px] border-blue-500/20 hover:border-blue-400/40 hover:shadow-blue-500/10 transition-all duration-300 mb-8">
           <div className="card-body">
             <h2 className="card-title flex items-center gap-2 mb-4">
               <FaInfoCircle className="text-info" />
@@ -498,7 +498,7 @@ const VotingPage = () => {
 
         {/* Candidates */}
         {election.candidates && election.candidates.length > 0 && (
-          <div className="card bg-base-100 shadow-xl">
+          <div className="card bg-base-100 shadow-xl border-[0.5px] border-yellow-500/20 hover:border-yellow-400/40 hover:shadow-yellow-500/10 transition-all duration-300">
             <div className="card-body">
               <h2 className="card-title flex items-center gap-2">
                 <FaTrophy className="text-warning" />
