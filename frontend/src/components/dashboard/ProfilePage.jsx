@@ -204,16 +204,37 @@ const ProfilePage = () => {
 
     setLoadingNFTs(true);
     try {
-      const result = await walletService.getUserNFTs(user.walletAddress);
+      // Try blockchain first
+      let result = await walletService.getUserNFTs(user.walletAddress);
+      
+      // If blockchain fails, try backend fallback
+      if (!result.success && (result.error.includes('EIP-1193') || result.error.includes('MetaMask'))) {
+        console.log('Blockchain unavailable, trying backend fallback...');
+        result = await walletService.fetchUserNFTsFromBackend(user.walletAddress);
+      }
+      
       if (result.success) {
         setBlockchainNFTs(result.nfts);
         setShowNFTModal(true);
-        toast.success(`Found ${result.count} NFT badges on blockchain!`);
+        const source = result.source === 'backend' ? '(from database)' : '(from blockchain)';
+        toast.success(`Found ${result.count} NFT badges ${source}!`);
       } else {
-        toast.error('Failed to fetch NFTs from blockchain: ' + result.error);
+        // More graceful error handling
+        if (result.error.includes('MetaMask')) {
+          toast.error('Please install and connect MetaMask to view blockchain NFTs');
+        } else if (result.error.includes('Wallet not connected')) {
+          toast.error('Please connect your wallet to view NFTs');
+        } else {
+          toast.error('Failed to fetch NFTs: ' + result.error);
+        }
       }
     } catch (error) {
-      toast.error('Error connecting to blockchain: ' + error.message);
+      console.error('NFT fetch error:', error);
+      if (error.message.includes('EIP-1193')) {
+        toast.error('MetaMask not available. Please install MetaMask extension.');
+      } else {
+        toast.error('Error connecting to blockchain: ' + error.message);
+      }
     } finally {
       setLoadingNFTs(false);
     }

@@ -1,0 +1,12 @@
+{
+  "network": "localhost",
+  "chainId": 31337,
+  "contracts": {
+    "Voting": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707",
+    "VotingNFT": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
+    "ZKVerifier": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9"
+  },
+  "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  "deployedAt": "2025-10-26T11:47:21.742Z",
+  "blockNumber": 8
+}

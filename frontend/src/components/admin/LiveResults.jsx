@@ -71,7 +71,9 @@ const LiveResults = () => {
                 {console.log('Live Results Data:', liveResults)}
                 {console.log('Results Array:', liveResults.results)}
                 {console.log('Results Length:', liveResults.results?.length)}
-                {console.log('Data Structure:', JSON.stringify(liveResults, null, 2))}
+                {console.log('Election Type:', liveResults.election?.electionType)}
+                {console.log('Total Votes:', liveResults.summary?.totalVotes)}
+                {console.log('Total Candidates:', liveResults.summary?.totalCandidates)}
                 
                 {/* Summary Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

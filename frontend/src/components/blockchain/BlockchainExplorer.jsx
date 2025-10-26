@@ -41,15 +41,32 @@ const BlockchainExplorer = () => {
 
     setLoading(true);
     try {
-      const result = await walletService.getUserNFTs(user.walletAddress);
+      // Try blockchain first
+      let result = await walletService.getUserNFTs(user.walletAddress);
+      
+      // If blockchain fails, try backend fallback
+      if (!result.success && result.error.includes('EIP-1193')) {
+        console.log('Blockchain unavailable, trying backend fallback...');
+        result = await walletService.fetchUserNFTsFromBackend(user.walletAddress);
+      }
+      
       if (result.success) {
         setUserNFTs(result.nfts);
-        toast.success(`Found ${result.count} NFTs on blockchain`);
+        const source = result.source === 'backend' ? '(from database)' : '(from blockchain)';
+        toast.success(`Found ${result.count} NFTs ${source}`);
       } else {
-        toast.error('Failed to fetch NFTs: ' + result.error);
+        console.error('NFT fetch failed:', result.error);
+        // Don't show error toast for wallet connection issues - just show empty state
+        if (!result.error.includes('MetaMask') && !result.error.includes('Wallet')) {
+          toast.error('Failed to fetch NFTs: ' + result.error);
+        }
       }
     } catch (error) {
-      toast.error('Error: ' + error.message);
+      console.error('NFT fetch error:', error);
+      // Don't show error toast for connection issues
+      if (!error.message.includes('EIP-1193') && !error.message.includes('MetaMask')) {
+        toast.error('Error: ' + error.message);
+      }
     } finally {
       setLoading(false);
     }

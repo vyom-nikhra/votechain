@@ -454,4 +454,65 @@ router.get('/stats', [authMiddleware, adminMiddleware], async (req, res) => {
   }
 });
 
+// @route   GET /api/users/nfts/:walletAddress
+// @desc    Get NFTs for a wallet address (fallback when blockchain is not available)
+// @access  Public
+router.get('/nfts/:walletAddress', async (req, res) => {
+  try {
+    const { walletAddress } = req.params;
+
+    // Find user by wallet address
+    const user = await User.findOne({ walletAddress: walletAddress.toLowerCase() });
+    if (!user) {
+      return res.json({
+        success: true,
+        nfts: [],
+        count: 0,
+        message: 'User not found'
+      });
+    }
+
+    // Find all votes by this user (each vote should have an NFT)
+    const votes = await Vote.find({ voterId: user._id })
+      .populate('electionId', 'title description')
+      .sort({ createdAt: -1 });
+
+    // Create NFT representations based on votes
+    const nfts = votes
+      .filter(vote => vote.nftMinted || vote.nftTransactionHash) // Only include votes with NFTs
+      .map((vote, index) => ({
+        tokenId: vote.nftTransactionHash || `vote_${vote._id}`,
+        tokenURI: null,
+        contractAddress: process.env.NFT_CONTRACT || '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+        type: 'Voting NFT Badge',
+        metadata: {
+          name: `Voting Badge #${index + 1}`,
+          description: `Participation badge for "${vote.electionId?.title || 'Unknown Election'}"`,
+          election: vote.electionId?.title,
+          votedAt: vote.createdAt,
+          transactionHash: vote.nftTransactionHash
+        }
+      }));
+
+    res.json({
+      success: true,
+      nfts,
+      count: nfts.length,
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        studentId: user.studentId
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching user NFTs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user NFTs',
+      error: error.message
+    });
+  }
+});
+
 export default router;

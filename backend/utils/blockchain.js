@@ -18,18 +18,19 @@ const VOTING_ABI = [
 ];
 
 const NFT_ABI = [
-  "function mintVoterBadge(address to, uint256 electionId, string memory badgeType) external returns (uint256)",
+  "function mintVoterBadge(address to, uint256 electionId) external returns (uint256)",
   "function balanceOf(address owner) external view returns (uint256)",
   "function tokenURI(uint256 tokenId) external view returns (string memory)",
   "function ownerOf(uint256 tokenId) external view returns (address)",
+  "function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)",
   "function getAddress() external view returns (address)"
 ];
 
-// Contract addresses on Local Hardhat Network
+// Contract addresses on Local Hardhat Network (Updated from latest deployment)
 const CONTRACT_ADDRESSES = {
-  VOTING: process.env.VOTING_CONTRACT || '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
-  NFT: process.env.NFT_CONTRACT || '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-  ZK_VERIFIER: process.env.ZK_VERIFIER_CONTRACT || '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+  VOTING: process.env.VOTING_CONTRACT || '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707',
+  NFT: process.env.NFT_CONTRACT || '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+  ZK_VERIFIER: process.env.ZK_VERIFIER_CONTRACT || '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'
 };
 
 // Initialize provider
@@ -54,6 +55,14 @@ class BlockchainService {
     this.votingContract = null;
     this.nftContract = null;
     this.isConnected = false;
+  }
+
+  // Convert MongoDB ObjectId to numeric for smart contract compatibility
+  convertToNumeric(objectId) {
+    // Convert ObjectId string to a numeric value
+    // Take last 8 characters (32 bits) to ensure it fits in uint256
+    const hex = objectId.toString().slice(-8);
+    return parseInt(hex, 16);
   }
 
   async initialize() {
@@ -199,10 +208,12 @@ class BlockchainService {
     try {
       console.log('🏅 Minting voter NFT for:', voterAddress);
 
+      // Convert MongoDB ObjectId to numeric for smart contract
+      const numericElectionId = this.convertToNumeric(electionId);
+
       const tx = await this.nftContract.mintVoterBadge(
         voterAddress,
-        electionId,
-        'voter'
+        numericElectionId
       );
 
       const receipt = await tx.wait();

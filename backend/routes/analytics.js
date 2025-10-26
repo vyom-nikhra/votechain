@@ -534,14 +534,14 @@ router.get('/live-results/:electionId', authMiddleware, adminMiddleware, async (
       // Simple voting - count votes per candidate
       const voteCounts = {};
       
-      // Ensure we have candidates
+      // Ensure we have candidates and initialize with 0 votes
       if (!election.candidates || election.candidates.length === 0) {
         console.log('No candidates found in election');
         results = [];
       } else {
         election.candidates.forEach(candidate => {
           const candidateId = candidate._id.toString();
-          console.log('Initializing candidate:', candidateId, candidate.name);
+          console.log('Initializing simple candidate:', candidateId, candidate.name);
           voteCounts[candidateId] = {
             candidate: candidate,
             votes: 0,
@@ -702,6 +702,42 @@ router.get('/live-results/:electionId', authMiddleware, adminMiddleware, async (
           credits: r.credits,
           percentage: r.percentage 
         })));
+      } else {
+        // No candidates found, return empty results
+        results = [];
+      }
+    } else {
+      // Unknown election type, fallback to simple initialization
+      console.log('Unknown election type:', election.electionType, 'falling back to simple counting');
+      const fallbackCounts = {};
+      
+      if (election.candidates && election.candidates.length > 0) {
+        election.candidates.forEach(candidate => {
+          const candidateId = candidate._id.toString();
+          fallbackCounts[candidateId] = {
+            candidate: candidate,
+            votes: 0,
+            percentage: 0,
+            voters: []
+          };
+        });
+
+        // Count votes as simple votes
+        votes.forEach(vote => {
+          if (vote.candidateId) {
+            const candidateId = vote.candidateId.toString();
+            if (fallbackCounts[candidateId]) {
+              fallbackCounts[candidateId].votes++;
+            }
+          }
+        });
+
+        results = Object.values(fallbackCounts).map(item => ({
+          ...item,
+          percentage: totalVotes > 0 ? Math.round((item.votes / totalVotes) * 100 * 100) / 100 : 0
+        })).sort((a, b) => b.votes - a.votes);
+      } else {
+        results = [];
       }
     }
 
