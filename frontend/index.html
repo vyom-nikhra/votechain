@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en" data-theme="votechain">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="VoteChain - Decentralized Voting Platform powered by Blockchain" />
+    <title>VoteChain - Secure Decentralized Voting</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Theme switching functionality
+      const themeController = {
+        init() {
+          // Get saved theme from localStorage or default to 'votechain'
+          const savedTheme = localStorage.getItem('votechain-theme') || 'votechain';
+          this.setTheme(savedTheme);
+          this.bindEvents();
+        },
+        
+        setTheme(theme) {
+          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('votechain-theme', theme);
+        },
+        
+        bindEvents() {
+          // Listen for theme changes from dropdown buttons
+          document.addEventListener('click', (e) => {
+            if (e.target.hasAttribute('data-set-theme')) {
+              this.setTheme(e.target.getAttribute('data-set-theme'));
+            }
+          });
+        }
+      };
+      
+      // Initialize theme controller when DOM is loaded
+      document.addEventListener('DOMContentLoaded', () => {
+        themeController.init();
+      });
+    </script>
+  </body>
+</html>
