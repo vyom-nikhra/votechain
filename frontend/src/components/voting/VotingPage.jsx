@@ -37,6 +37,8 @@ const VotingPage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [isVoting, setIsVoting] = useState(false);
+  const [nftVerification, setNftVerification] = useState(null);
+  const [isVerifyingNft, setIsVerifyingNft] = useState(false);
 
   // Fetch election details
   const { data: election, isLoading, error } = useQuery({
@@ -169,6 +171,44 @@ const VotingPage = () => {
       electionId: election._id,
       voteData: voteData
     });
+  };
+
+  // NFT verification function
+  const verifyNFT = async () => {
+    if (!hasVoted || !myVotes?.length) {
+      toast.error('No vote found to verify NFT');
+      return;
+    }
+
+    const userVote = myVotes.find(vote => vote.election?._id === electionId);
+    if (!userVote) {
+      toast.error('Vote not found for this election');
+      return;
+    }
+
+    setIsVerifyingNft(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/votes/verify-nft/${userVote._id}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setNftVerification(data);
+        toast.success('NFT verified successfully!');
+      } else {
+        toast.error(data.message || 'NFT verification failed');
+      }
+    } catch (error) {
+      console.error('NFT verification error:', error);
+      toast.error('Failed to verify NFT');
+    } finally {
+      setIsVerifyingNft(false);
+    }
   };
 
   const statusInfo = getElectionStatus();
@@ -723,8 +763,41 @@ const VotingPage = () => {
                   <div className="text-sm opacity-80">
                     Your participation has been immortalized on the blockchain with a unique NFT certificate.
                   </div>
-                  <div className="mt-2">
+                  <div className="mt-3 space-y-2">
                     <div className="badge badge-success">Minted Successfully</div>
+                    
+                    {/* NFT Verification Section */}
+                    {nftVerification ? (
+                      <div className="mt-3 space-y-2">
+                        <div className="text-xs bg-base-200 p-3 rounded">
+                          <div><strong>Token ID:</strong> #{nftVerification.nftDetails.tokenId}</div>
+                          <div><strong>Contract:</strong> <code className="text-xs">{nftVerification.nftDetails.contractAddress}</code></div>
+                          <div><strong>Owner:</strong> <code className="text-xs">{nftVerification.nftDetails.owner}</code></div>
+                          <div><strong>Block:</strong> {nftVerification.nftDetails.blockNumber}</div>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-success">
+                          <FaCheck /> Verified on blockchain
+                        </div>
+                      </div>
+                    ) : (
+                      <button 
+                        className="btn btn-sm btn-primary mt-2"
+                        onClick={verifyNFT}
+                        disabled={isVerifyingNft}
+                      >
+                        {isVerifyingNft ? (
+                          <>
+                            <span className="loading loading-spinner loading-xs"></span>
+                            Verifying...
+                          </>
+                        ) : (
+                          <>
+                            <FaCubes className="mr-1" />
+                            Verify on Blockchain
+                          </>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

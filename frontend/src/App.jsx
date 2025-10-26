@@ -19,9 +19,10 @@ import EmailVerificationPage from './components/auth/EmailVerificationPage';
 import Dashboard from './components/dashboard/Dashboard';
 import ElectionsList from './components/voting/ElectionsList';
 import VotingPage from './components/voting/VotingPage';
-import AdminPanel from './components/dashboard/AdminPanel';
 import ProfilePage from './components/dashboard/ProfilePage';
 import BlockchainExplorer from './components/blockchain/BlockchainExplorer';
+import CreateElection from './components/admin/CreateElection';
+import LiveResults from './components/admin/LiveResults';
 
 // Hooks and Store
 import { useAuthStore } from './store/authStore';
@@ -89,9 +90,14 @@ function App() {
                         <VotingPage />
                       </ProtectedRoute>
                     } />
-                    <Route path="/admin" element={
+                    <Route path="/create-election" element={
                       <ProtectedRoute adminOnly>
-                        <AdminPanel />
+                        <CreateElection />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/live-results" element={
+                      <ProtectedRoute adminOnly>
+                        <LiveResults />
                       </ProtectedRoute>
                     } />
                     <Route path="/profile" element={

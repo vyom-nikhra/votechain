@@ -202,15 +202,44 @@ class WalletService {
     }
   }
 
-  // Get NFTs from blockchain
+    // Alias for backward compatibility
   async getUserNFTs(userAddress) {
-    if (!this.provider) {
-      throw new Error('Wallet not connected');
+    return this.fetchUserNFTs(userAddress);
+  }
+
+  // Get NFTs owned by user
+  async fetchUserNFTs(userAddress) {
+    if (!userAddress) {
+      throw new Error('User address is required');
+    }
+
+    // Check if MetaMask is available and connected
+    if (!this.isMetaMaskAvailable()) {
+      return {
+        success: false,
+        error: 'MetaMask is not installed or available',
+        nfts: [],
+        count: 0
+      };
+    }
+
+    if (!this.provider || !this.isConnected) {
+      try {
+        // Try to connect wallet if not connected
+        await this.connectWallet();
+      } catch (error) {
+        return {
+          success: false,
+          error: 'Wallet not connected. Please connect your MetaMask wallet.',
+          nfts: [],
+          count: 0
+        };
+      }
     }
 
     try {
       // NFT Contract address (from deployment file)
-      const NFT_CONTRACT_ADDRESS = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'; // VotingNFT contract
+      const NFT_CONTRACT_ADDRESS = '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9'; // VotingNFT contract
       
       // ERC-721 ABI for balance and tokenOfOwnerByIndex functions
       const ERC721_ABI = [
@@ -222,20 +251,36 @@ class WalletService {
 
       // Create ethers provider
       const { ethers } = await import('ethers');
-      const provider = new ethers.providers.Web3Provider(this.provider);
+      const provider = new ethers.BrowserProvider(this.provider);
+      
+      // Check if provider is connected
+      const network = await provider.getNetwork();
+      console.log('Connected to network:', network);
+      
       const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, ERC721_ABI, provider);
+
+      // Check if contract exists by getting code at the address
+      const code = await provider.getCode(NFT_CONTRACT_ADDRESS);
+      if (code === '0x') {
+        console.warn('No contract deployed at address:', NFT_CONTRACT_ADDRESS);
+        return {
+          success: true,
+          nfts: [],
+          count: 0,
+          message: 'Contract not deployed. Please deploy the contracts first.'
+        };
+      }
 
       // Get number of NFTs owned by user
       const balance = await contract.balanceOf(userAddress);
-      const nftCount = balance.toNumber();
+      const nftCount = Number(balance);
 
       const nfts = [];
       
       // Get each NFT token ID and metadata
       for (let i = 0; i < nftCount; i++) {
-        const tokenId = await contract.tokenOfOwnerByIndex(userAddress, i);
-        
         try {
+          const tokenId = await contract.tokenOfOwnerByIndex(userAddress, i);
           const tokenURI = await contract.tokenURI(tokenId);
           nfts.push({
             tokenId: tokenId.toString(),
@@ -244,13 +289,7 @@ class WalletService {
             type: 'Voting NFT Badge'
           });
         } catch (error) {
-          console.warn(`Could not fetch metadata for token ${tokenId}:`, error);
-          nfts.push({
-            tokenId: tokenId.toString(),
-            tokenURI: null,
-            contractAddress: NFT_CONTRACT_ADDRESS,
-            type: 'Voting NFT Badge'
-          });
+          console.warn(`Could not fetch NFT ${i}:`, error);
         }
       }
 
@@ -260,7 +299,50 @@ class WalletService {
         count: nftCount
       };
     } catch (error) {
-      console.error('Error fetching NFTs:', error);
+      console.error('Failed to fetch NFTs from blockchain:', error);
+      
+      // Fallback: Try to get NFT info from backend API
+      try {
+        console.log('Trying fallback: fetch NFTs from backend API...');
+        const response = await fetch(`/api/users/nfts/${userAddress}`);
+        if (response.ok) {
+          const data = await response.json();
+          return {
+            success: true,
+            nfts: data.nfts || [],
+            count: data.count || 0,
+            source: 'backend'
+          };
+        }
+      } catch (backendError) {
+        console.warn('Backend NFT fetch also failed:', backendError.message);
+      }
+      
+      return {
+        success: false,
+        error: error.message,
+        nfts: [],
+        count: 0
+      };
+    }
+  }
+
+  // Alternative method to fetch NFTs without requiring blockchain connection
+  async fetchUserNFTsFromBackend(userAddress) {
+    try {
+      const response = await fetch(`/api/users/nfts/${userAddress}`);
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          success: true,
+          nfts: data.nfts || [],
+          count: data.count || 0,
+          source: 'backend'
+        };
+      } else {
+        throw new Error(`Backend API error: ${response.status}`);
+      }
+    } catch (error) {
       return {
         success: false,
         error: error.message,
@@ -283,7 +365,7 @@ class WalletService {
       ];
 
       const { ethers } = await import('ethers');
-      const provider = new ethers.providers.Web3Provider(this.provider);
+      const provider = new ethers.BrowserProvider(this.provider);
       const contract = new ethers.Contract(contractAddress, ERC721_ABI, provider);
 
       const tokenURI = await contract.tokenURI(tokenId);

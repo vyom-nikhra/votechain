@@ -30,16 +30,14 @@ const Dashboard = () => {
 
   // Fetch dashboard data
   const { data: stats, isLoading: statsLoading } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: () => analyticsAPI.getDashboardStats(),
+    queryKey: ['overview-stats'],
+    queryFn: () => analyticsAPI.getOverviewStats(),
     select: (response) => response.data,
+    refetchInterval: 30000, // Refetch every 30 seconds for live updates
   });
 
-  const { data: electionsData, isLoading: electionsLoading } = useQuery({
-    queryKey: ['recent-elections'],
-    queryFn: () => electionsAPI.getAll({ limit: 5 }),
-    select: (response) => response.data.elections || [],
-  });
+  const recentElections = stats?.recentElections || [];
+  const electionsLoading = statsLoading;
 
   const handleLogout = () => {
     logout();
@@ -138,7 +136,7 @@ const Dashboard = () => {
                     Total Elections
                   </p>
                   <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                    {statsLoading ? '...' : stats?.totalElections || 0}
+                    {statsLoading ? '...' : stats?.overview?.totalElections || 0}
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -157,7 +155,7 @@ const Dashboard = () => {
                     Votes Cast
                   </p>
                   <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                    {statsLoading ? '...' : stats?.votescast || 0}
+                    {statsLoading ? '...' : stats?.overview?.totalVotes || 0}
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -176,7 +174,7 @@ const Dashboard = () => {
                     Active Elections
                   </p>
                   <p className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                    {statsLoading ? '...' : stats?.activeElections || 0}
+                    {statsLoading ? '...' : stats?.overview?.activeElections || 0}
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -195,7 +193,7 @@ const Dashboard = () => {
                     NFT Badges
                   </p>
                   <p className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
-                    {statsLoading ? '...' : stats?.nftBadges || 0}
+                    {statsLoading ? '...' : stats?.overview?.totalVotes || 0}
                   </p>
                 </div>
                 <div className="p-3 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
@@ -231,9 +229,9 @@ const Dashboard = () => {
                     </div>
                   ))}
                 </div>
-              ) : electionsData && electionsData.length > 0 ? (
+              ) : recentElections && recentElections.length > 0 ? (
                 <div className="space-y-4">
-                  {electionsData.slice(0, 3).map((election) => {
+                  {recentElections.slice(0, 3).map((election) => {
                     const status = getElectionStatus(election);
                     return (
                       <div key={election._id} className="group border-[0.5px] border-gray-700 rounded-xl p-4 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-300 bg-base-100/50">

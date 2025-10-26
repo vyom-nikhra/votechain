@@ -49,10 +49,16 @@ const Sidebar = () => {
 
   if (isAdmin()) {
     navItems.push({
-      path: '/admin',
-      name: 'Admin Panel',
+      path: '/create-election',
+      name: 'Create Election',
       icon: <MdAdminPanelSettings className="text-xl" />,
-      description: 'System Management'
+      description: 'New Election'
+    });
+    navItems.push({
+      path: '/live-results',
+      name: 'Live Results',
+      icon: <MdHowToVote className="text-xl" />,
+      description: 'Monitor Voting'
     });
   }
 

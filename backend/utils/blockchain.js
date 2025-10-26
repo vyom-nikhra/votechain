@@ -18,16 +18,19 @@ const VOTING_ABI = [
 ];
 
 const NFT_ABI = [
-  "function mintVoterBadge(address to, uint256 electionId, string memory badgeType) external returns (uint256)",
+  "function mintVoterBadge(address to, uint256 electionId) external returns (uint256)",
   "function balanceOf(address owner) external view returns (uint256)",
-  "function tokenURI(uint256 tokenId) external view returns (string memory)"
+  "function tokenURI(uint256 tokenId) external view returns (string memory)",
+  "function ownerOf(uint256 tokenId) external view returns (address)",
+  "function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256)",
+  "function getAddress() external view returns (address)"
 ];
 
-// Contract addresses on Local Hardhat Network
+// Contract addresses on Local Hardhat Network (Updated from latest deployment)
 const CONTRACT_ADDRESSES = {
-  VOTING: process.env.VOTING_CONTRACT || '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
-  NFT: process.env.NFT_CONTRACT || '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
-  ZK_VERIFIER: process.env.ZK_VERIFIER_CONTRACT || '0x5FbDB2315678afecb367f032d93F642f64180aa3'
+  VOTING: process.env.VOTING_CONTRACT || '0x5FC8d32690cc91D4c39d9d3abcBD16989F875707',
+  NFT: process.env.NFT_CONTRACT || '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9',
+  ZK_VERIFIER: process.env.ZK_VERIFIER_CONTRACT || '0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9'
 };
 
 // Initialize provider
@@ -52,6 +55,14 @@ class BlockchainService {
     this.votingContract = null;
     this.nftContract = null;
     this.isConnected = false;
+  }
+
+  // Convert MongoDB ObjectId to numeric for smart contract compatibility
+  convertToNumeric(objectId) {
+    // Convert ObjectId string to a numeric value
+    // Take last 8 characters (32 bits) to ensure it fits in uint256
+    const hex = objectId.toString().slice(-8);
+    return parseInt(hex, 16);
   }
 
   async initialize() {
@@ -197,10 +208,12 @@ class BlockchainService {
     try {
       console.log('🏅 Minting voter NFT for:', voterAddress);
 
+      // Convert MongoDB ObjectId to numeric for smart contract
+      const numericElectionId = this.convertToNumeric(electionId);
+
       const tx = await this.nftContract.mintVoterBadge(
         voterAddress,
-        electionId,
-        'voter'
+        numericElectionId
       );
 
       const receipt = await tx.wait();
@@ -236,6 +249,60 @@ class BlockchainService {
     } catch (error) {
       console.error('Failed to get election from blockchain:', error);
       return null;
+    }
+  }
+
+  // Verify NFT certificate on blockchain
+  async verifyVotingNFT(tokenId) {
+    try {
+      if (!this.nftContract) {
+        throw new Error('NFT contract not initialized');
+      }
+
+      console.log('🔍 Verifying NFT token ID:', tokenId);
+
+      // Get token owner
+      const owner = await this.nftContract.ownerOf(tokenId);
+      
+      // Get token metadata URI
+      const tokenURI = await this.nftContract.tokenURI(tokenId);
+      
+      // Get current block number for verification
+      const currentBlock = await this.provider.getBlockNumber();
+
+      // Parse metadata if it's a valid JSON URI
+      let metadata = null;
+      try {
+        if (tokenURI.startsWith('data:application/json;base64,')) {
+          // Base64 encoded JSON
+          const base64Data = tokenURI.split(',')[1];
+          const jsonString = Buffer.from(base64Data, 'base64').toString('utf-8');
+          metadata = JSON.parse(jsonString);
+        } else if (tokenURI.startsWith('http')) {
+          // HTTP URL (would need to fetch in real implementation)
+          metadata = { uri: tokenURI };
+        } else {
+          // Raw JSON string
+          metadata = JSON.parse(tokenURI);
+        }
+      } catch (parseError) {
+        console.warn('Could not parse NFT metadata:', parseError.message);
+        metadata = { raw: tokenURI };
+      }
+
+      return {
+        tokenId: tokenId.toString(),
+        owner: owner,
+        contractAddress: await this.nftContract.getAddress(),
+        metadata: metadata,
+        blockNumber: currentBlock,
+        verified: true,
+        verificationTime: new Date().toISOString()
+      };
+
+    } catch (error) {
+      console.error('NFT verification failed:', error);
+      throw new Error(`Failed to verify NFT: ${error.message}`);
     }
   }
 }
