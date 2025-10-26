@@ -1,4 +1,5 @@
-import { ethers, upgrades } from "hardhat";
+import pkg from 'hardhat';
+const { ethers, upgrades } = pkg;
 import fs from 'fs';
 import path from 'path';
 
@@ -136,7 +137,10 @@ async function main() {
     blockNumber: await deployer.provider.getBlockNumber()
   };
 
-  // Write deployment info to file
+  // Write deployment info to file (ES module compatible)
+  
+  const __filename = new URL(import.meta.url).pathname;
+  const __dirname = path.dirname(__filename);
   
   const deploymentPath = path.join(__dirname, '../deployments');
   if (!fs.existsSync(deploymentPath)) {

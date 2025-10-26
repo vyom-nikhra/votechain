@@ -1,35 +1,249 @@
 import { ethers } from 'ethers';
-import Web3 from 'web3';
 
-// Polygon Mumbai testnet configuration
-const POLYGON_CONFIG = {
-  chainId: 80001,
-  name: 'Polygon Mumbai Testnet',
-  rpcUrl: process.env.POLYGON_RPC_URL || 'https://rpc-mumbai.maticvigil.com',
-  explorerUrl: 'https://mumbai.polygonscan.com'
+// Network configuration - now supports local Hardhat
+const NETWORK_CONFIG = {
+  chainId: process.env.CHAIN_ID || 31337,
+  name: process.env.CHAIN_ID === '31337' ? 'Hardhat Local' : 'Polygon Mumbai Testnet',
+  rpcUrl: process.env.POLYGON_RPC_URL || 'http://127.0.0.1:8545',
+  explorerUrl: process.env.CHAIN_ID === '31337' ? 'http://localhost:8545' : 'https://mumbai.polygonscan.com'
+};
+
+// Contract ABIs (simplified for integration)
+const VOTING_ABI = [
+  "function createElection(string memory _title, string memory _description, string[] memory _candidates, uint256 _startTime, uint256 _endTime, uint8 _voteType) external returns (uint256)",
+  "function castVote(uint256 _electionId, bytes32 _voteHash, bytes32 _nullifierHash, bytes calldata _zkProof) external",
+  "function getElection(uint256 _electionId) external view returns (tuple(uint256 id, string title, string description, address creator, uint256 startTime, uint256 endTime, uint8 voteType, uint8 status, uint256 totalVotes))",
+  "event VoteCast(uint256 indexed electionId, address indexed voter, bytes32 voteHash, uint8 voteType)",
+  "event ElectionCreated(uint256 indexed electionId, string title, address indexed creator, uint256 startTime, uint256 endTime)"
+];
+
+const NFT_ABI = [
+  "function mintVoterBadge(address to, uint256 electionId, string memory badgeType) external returns (uint256)",
+  "function balanceOf(address owner) external view returns (uint256)",
+  "function tokenURI(uint256 tokenId) external view returns (string memory)"
+];
+
+// Contract addresses on Local Hardhat Network
+const CONTRACT_ADDRESSES = {
+  VOTING: process.env.VOTING_CONTRACT || '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0',
+  NFT: process.env.NFT_CONTRACT || '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512',
+  ZK_VERIFIER: process.env.ZK_VERIFIER_CONTRACT || '0x5FbDB2315678afecb367f032d93F642f64180aa3'
 };
 
 // Initialize provider
 const getProvider = () => {
-  return new ethers.JsonRpcProvider(POLYGON_CONFIG.rpcUrl);
+  return new ethers.JsonRpcProvider(NETWORK_CONFIG.rpcUrl);
 };
 
-// Initialize signer (for backend operations)
+// Initialize signer (for backend operations)  
 const getSigner = () => {
-  if (!process.env.PRIVATE_KEY) {
-    throw new Error('Private key not configured');
-  }
+  // Use Hardhat test account for local development
+  const privateKey = process.env.BLOCKCHAIN_PRIVATE_KEY || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
   
   const provider = getProvider();
-  return new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+  return new ethers.Wallet(privateKey, provider);
 };
 
-// Web3 instance for compatibility
-const getWeb3Instance = () => {
-  return new Web3(POLYGON_CONFIG.rpcUrl);
-};
+// Blockchain service class
+class BlockchainService {
+  constructor() {
+    this.provider = null;
+    this.signer = null;
+    this.votingContract = null;
+    this.nftContract = null;
+    this.isConnected = false;
+  }
 
-// Contract ABIs (will be updated when contracts are deployed)
+  async initialize() {
+    try {
+      console.log('🔗 Initializing blockchain service...');
+      
+      this.provider = getProvider();
+      this.signer = getSigner();
+
+      // Initialize contracts
+      this.votingContract = new ethers.Contract(
+        CONTRACT_ADDRESSES.VOTING,
+        VOTING_ABI,
+        this.signer
+      );
+
+      this.nftContract = new ethers.Contract(
+        CONTRACT_ADDRESSES.NFT,
+        NFT_ABI,
+        this.signer
+      );
+
+      // Test connection
+      const network = await this.provider.getNetwork();
+      console.log(`✅ Connected to blockchain: ${NETWORK_CONFIG.name} (Chain ID: ${network.chainId})`);
+      
+      this.isConnected = true;
+      return true;
+    } catch (error) {
+      console.error('❌ Blockchain initialization failed:', error.message);
+      this.isConnected = false;
+      return false;
+    }
+  }
+
+  async createElectionOnChain(electionData) {
+    if (!this.isConnected) {
+      console.warn('Blockchain not connected, skipping election creation');
+      return { success: false, error: 'Blockchain not connected' };
+    }
+
+    try {
+      const { title, description, candidates, votingStartTime, votingEndTime, electionType } = electionData;
+
+      // Convert candidate objects to names array
+      const candidateNames = candidates.map(c => c.name);
+      
+      // Convert vote type to enum (simple=0, ranked=1, quadratic=2)
+      const voteTypeMap = { 'simple': 0, 'ranked': 1, 'quadratic': 2 };
+      const voteType = voteTypeMap[electionType] || 0;
+
+      // Convert timestamps to blockchain format (Unix timestamp)
+      const startTime = Math.floor(new Date(votingStartTime).getTime() / 1000);
+      const endTime = Math.floor(new Date(votingEndTime).getTime() / 1000);
+
+      console.log('📝 Creating election on blockchain:', { title, candidateCount: candidateNames.length });
+
+      const tx = await this.votingContract.createElection(
+        title,
+        description,
+        candidateNames,
+        startTime,
+        endTime,
+        voteType
+      );
+
+      const receipt = await tx.wait();
+      
+      // Find the ElectionCreated event to get blockchain election ID
+      const event = receipt.logs.find(log => {
+        try {
+          const parsed = this.votingContract.interface.parseLog(log);
+          return parsed.name === 'ElectionCreated';
+        } catch {
+          return false;
+        }
+      });
+
+      if (event) {
+        const parsed = this.votingContract.interface.parseLog(event);
+        const blockchainElectionId = parsed.args.electionId.toString();
+        
+        console.log('✅ Election created on blockchain with ID:', blockchainElectionId);
+        
+        return {
+          success: true,
+          blockchainElectionId,
+          transactionHash: tx.hash,
+          blockNumber: receipt.blockNumber,
+          gasUsed: receipt.gasUsed.toString()
+        };
+      }
+
+      throw new Error('ElectionCreated event not found in transaction receipt');
+    } catch (error) {
+      console.error('❌ Failed to create election on blockchain:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async castVoteOnChain(voteData) {
+    if (!this.isConnected) {
+      console.warn('Blockchain not connected, skipping vote recording');
+      return { success: false, error: 'Blockchain not connected' };
+    }
+
+    try {
+      const { blockchainElectionId, voteHash, nullifierHash } = voteData;
+
+      // For demo purposes, use empty ZK proof (in production, generate real proof)
+      const zkProof = '0x';
+
+      console.log('🗳️  Recording vote on blockchain for election:', blockchainElectionId);
+
+      const tx = await this.votingContract.castVote(
+        blockchainElectionId,
+        voteHash,
+        nullifierHash,
+        zkProof
+      );
+
+      const receipt = await tx.wait();
+
+      console.log('✅ Vote recorded on blockchain:', tx.hash);
+
+      return {
+        success: true,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        gasUsed: receipt.gasUsed.toString()
+      };
+    } catch (error) {
+      console.error('❌ Failed to record vote on blockchain:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  async mintVoterNFT(voterAddress, electionId) {
+    if (!this.isConnected) {
+      return { success: false, error: 'Blockchain not connected' };
+    }
+
+    try {
+      console.log('🏅 Minting voter NFT for:', voterAddress);
+
+      const tx = await this.nftContract.mintVoterBadge(
+        voterAddress,
+        electionId,
+        'voter'
+      );
+
+      const receipt = await tx.wait();
+
+      console.log('✅ Voter NFT minted:', tx.hash);
+
+      return {
+        success: true,
+        transactionHash: tx.hash,
+        blockNumber: receipt.blockNumber,
+        tokenId: receipt.logs[0]?.topics[3] // Usually the token ID
+      };
+    } catch (error) {
+      console.error('❌ Failed to mint voter NFT:', error.message);
+      return { success: false, error: error.message };
+    }
+  }
+
+  // Get blockchain election data (for verification)
+  async getElectionFromChain(blockchainElectionId) {
+    if (!this.isConnected) {
+      return null;
+    }
+
+    try {
+      const election = await this.votingContract.getElection(blockchainElectionId);
+      return {
+        id: election.id.toString(),
+        title: election.title,
+        totalVotes: election.totalVotes.toString(),
+        status: election.status
+      };
+    } catch (error) {
+      console.error('Failed to get election from blockchain:', error);
+      return null;
+    }
+  }
+}
+
+// Export singleton instance
+const blockchainService = new BlockchainService();
+
+// Old compatibility exports (keeping existing structure)
 const CONTRACT_ABIS = {
   voting: [
     // Voting contract ABI will be added after deployment
@@ -97,13 +311,6 @@ const CONTRACT_ABIS = {
       "type": "function"
     }
   ]
-};
-
-// Contract addresses (will be updated after deployment)
-const CONTRACT_ADDRESSES = {
-  voting: process.env.VOTING_CONTRACT_ADDRESS || '',
-  votingNFT: process.env.VOTING_NFT_CONTRACT_ADDRESS || '',
-  zkVerifier: process.env.ZK_VERIFIER_CONTRACT_ADDRESS || ''
 };
 
 // Get contract instance
@@ -320,11 +527,14 @@ export const getNetworkInfo = async () => {
   }
 };
 
+// Initialize the service on import
+blockchainService.initialize().catch(console.error);
+
+export default blockchainService;
+
 export {
-  POLYGON_CONFIG,
-  CONTRACT_ADDRESSES,
-  CONTRACT_ABIS,
+  NETWORK_CONFIG,
   getProvider,
   getSigner,
-  getWeb3Instance
+  blockchainService
 };

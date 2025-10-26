@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { electionsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
@@ -25,6 +26,7 @@ import {
 
 const ElectionsList = () => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -35,10 +37,14 @@ const ElectionsList = () => {
   const [newElection, setNewElection] = useState({
     title: '',
     description: '',
-    startDate: '',
-    endDate: '',
-    candidates: ['', ''],
-    department: '',
+    electionType: 'simple',
+    category: 'general',
+    registrationStartTime: '',
+    registrationEndTime: '',
+    votingStartTime: '',
+    votingEndTime: '',
+    candidates: [{ name: '', description: '', manifesto: '' }, { name: '', description: '', manifesto: '' }],
+    eligibleDepartments: [],
     eligibleYears: []
   });
 
@@ -136,18 +142,18 @@ const ElectionsList = () => {
 
   const handleCreateElection = () => {
     // Validation
-    if (!newElection.title || !newElection.description || !newElection.startDate || !newElection.endDate) {
+    if (!newElection.title || !newElection.description || !newElection.votingStartTime || !newElection.votingEndTime) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    if (newElection.candidates.some(c => !c.trim())) {
-      toast.error('Please provide names for all candidates');
+    if (newElection.candidates.some(c => !c.name || !c.description)) {
+      toast.error('Please provide name and description for all candidates');
       return;
     }
 
-    if (new Date(newElection.startDate) >= new Date(newElection.endDate)) {
-      toast.error('End date must be after start date');
+    if (new Date(newElection.votingStartTime) >= new Date(newElection.votingEndTime)) {
+      toast.error('Voting end time must be after start time');
       return;
     }
 
@@ -156,8 +162,8 @@ const ElectionsList = () => {
 
   const getStatusBadge = (election) => {
     const now = new Date();
-    const startDate = new Date(election.startDate);
-    const endDate = new Date(election.endDate);
+    const startDate = new Date(election.votingStartTime);
+    const endDate = new Date(election.votingEndTime);
 
     if (now < startDate) {
       return <div className="badge badge-info">Upcoming</div>;
@@ -335,7 +341,7 @@ const ElectionsList = () => {
                     <div className="flex gap-1">
                       <button 
                         className="btn btn-sm btn-outline"
-                        onClick={() => {/* Navigate to election details */}}
+                        onClick={() => navigate(`/vote/${election._id}`)}
                       >
                         <FaEye className="mr-1" />
                         View
@@ -364,12 +370,15 @@ const ElectionsList = () => {
 
                     {(() => {
                       const now = new Date();
-                      const startDate = new Date(election.startDate);
-                      const endDate = new Date(election.endDate);
+                      const startDate = new Date(election.votingStartTime);
+                      const endDate = new Date(election.votingEndTime);
                       
                       if (now >= startDate && now <= endDate) {
                         return (
-                          <button className="btn btn-primary btn-sm">
+                          <button 
+                            className="btn btn-primary btn-sm"
+                            onClick={() => navigate(`/vote/${election._id}`)}
+                          >
                             <FaVoteYea className="mr-1" />
                             Vote Now
                           </button>

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import crypto from 'crypto';
 
 const voteSchema = new mongoose.Schema({
   electionId: {
@@ -241,9 +242,8 @@ voteSchema.methods.anonymize = function() {
 
 // Pre-save middleware to generate hashes
 voteSchema.pre('save', function(next) {
-  if (this.isNew) {
-    // Generate vote hash
-    const crypto = require('crypto');
+  if (this.isNew && !this.voteHash) {
+    // Generate vote hash if not already set
     this.voteHash = crypto.createHash('sha256')
       .update(this.voteData + this.electionId + this.voterId + Date.now())
       .digest('hex');

@@ -4,6 +4,7 @@ import Election from '../models/Election.js';
 import User from '../models/User.js';
 import Vote from '../models/Vote.js';
 import { authMiddleware, adminMiddleware, verifiedEmailMiddleware } from '../middleware/auth.js';
+import blockchainService from '../utils/blockchain.js';
 
 const router = express.Router();
 
@@ -257,6 +258,33 @@ router.post('/', [
     });
 
     await election.save();
+
+    // 🔗 BLOCKCHAIN INTEGRATION: Create election on blockchain
+    try {
+      const blockchainResult = await blockchainService.createElectionOnChain({
+        title: election.title,
+        description: election.description,
+        candidates: election.candidates,
+        votingStartTime: election.votingStartTime,
+        votingEndTime: election.votingEndTime,
+        electionType: election.electionType
+      });
+
+      if (blockchainResult.success) {
+        // Update election with blockchain details
+        election.contractAddress = blockchainResult.blockchainElectionId;
+        election.metadata.blockchainTxHash = blockchainResult.transactionHash;
+        election.metadata.blockNumber = blockchainResult.blockNumber;
+        await election.save();
+        
+        console.log('✅ Election created on blockchain:', blockchainResult.transactionHash);
+      } else {
+        console.warn('⚠️ Blockchain election creation failed:', blockchainResult.error);
+      }
+    } catch (blockchainError) {
+      console.warn('⚠️ Blockchain integration failed (election still created):', blockchainError.message);
+      // Don't fail election creation if blockchain fails - graceful degradation
+    }
 
     // Emit real-time update
     if (req.io) {
@@ -617,25 +645,8 @@ router.delete('/:id', [authMiddleware, adminMiddleware], async (req, res) => {
       });
     }
 
-    // Check if election has started
-    const now = new Date();
-    const startTime = election.votingStartTime;
-    
-    if (now >= startTime) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete an election that has already started'
-      });
-    }
-
-    // Check if there are any votes
-    const voteCount = await Vote.countDocuments({ electionId: election._id });
-    if (voteCount > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete an election that has votes'
-      });
-    }
+    // Admin can delete elections anytime - no restrictions
+    console.log(`Admin ${req.user.id} deleting election: ${election.title}`);
 
     // Soft delete - mark as inactive instead of removing
     election.isActive = false;

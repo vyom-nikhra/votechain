@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
+import walletService from '../../services/walletService';
 import toast from 'react-hot-toast';
 import { 
   FaUser, 
@@ -17,7 +18,10 @@ import {
   FaWallet,
   FaTrophy,
   FaHistory,
-  FaShieldAlt
+  FaShieldAlt,
+  FaLink,
+  FaExternalLinkAlt,
+  FaCertificate
 } from 'react-icons/fa';
 
 const ProfilePage = () => {
@@ -51,6 +55,10 @@ const ProfilePage = () => {
     lastLogin: ''
   });
 
+  const [showNFTModal, setShowNFTModal] = useState(false);
+  const [blockchainNFTs, setBlockchainNFTs] = useState([]);
+  const [loadingNFTs, setLoadingNFTs] = useState(false);
+
   // Initialize profile data when user changes
   useEffect(() => {
     if (user) {
@@ -67,7 +75,7 @@ const ProfilePage = () => {
       // Mock stats - replace with real API calls
       setStats({
         totalVotes: user.votesCount || 0,
-        nftBadges: user.nftBadges || 0,
+        nftBadges: Array.isArray(user.nftBadges) ? user.nftBadges.length : (user.nftBadges || 0),
         joinedDate: new Date(user.createdAt).toLocaleDateString(),
         lastLogin: new Date(user.lastLogin || Date.now()).toLocaleDateString()
       });
@@ -129,6 +137,81 @@ const ProfilePage = () => {
       }
     } catch (error) {
       toast.error('Failed to change password');
+    }
+  };
+
+  // Wallet connection functions
+  const handleConnectWallet = async () => {
+    try {
+      if (!walletService.isMetaMaskAvailable()) {
+        toast.error('MetaMask is not installed. Please install MetaMask to connect your wallet.');
+        window.open('https://metamask.io/download/', '_blank');
+        return;
+      }
+
+      const result = await walletService.connectWallet();
+      
+      if (result.success) {
+        // Update profile with wallet address
+        const profileUpdate = await updateProfile({
+          ...profileData,
+          walletAddress: result.address
+        });
+        
+        if (profileUpdate.success) {
+          toast.success('Wallet connected successfully!');
+        }
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to connect wallet');
+    }
+  };
+
+  const handleDisconnectWallet = async () => {
+    try {
+      await walletService.disconnectWallet();
+      
+      // Update profile to remove wallet address
+      const profileUpdate = await updateProfile({
+        ...profileData,
+        walletAddress: null
+      });
+      
+      if (profileUpdate.success) {
+        toast.success('Wallet disconnected successfully!');
+      }
+    } catch (error) {
+      toast.error('Failed to disconnect wallet');
+    }
+  };
+
+  const copyWalletAddress = () => {
+    if (user?.walletAddress) {
+      navigator.clipboard.writeText(user.walletAddress);
+      toast.success('Wallet address copied to clipboard!');
+    }
+  };
+
+  const fetchBlockchainNFTs = async () => {
+    if (!user?.walletAddress) {
+      toast.error('No wallet connected. Please connect your wallet first.');
+      return;
+    }
+
+    setLoadingNFTs(true);
+    try {
+      const result = await walletService.getUserNFTs(user.walletAddress);
+      if (result.success) {
+        setBlockchainNFTs(result.nfts);
+        setShowNFTModal(true);
+        toast.success(`Found ${result.count} NFT badges on blockchain!`);
+      } else {
+        toast.error('Failed to fetch NFTs from blockchain: ' + result.error);
+      }
+    } catch (error) {
+      toast.error('Error connecting to blockchain: ' + error.message);
+    } finally {
+      setLoadingNFTs(false);
     }
   };
 
@@ -527,24 +610,48 @@ const ProfilePage = () => {
                   {user?.walletAddress ? (
                     <div>
                       <p className="text-sm text-base-content/70 mb-2">Connected Wallet:</p>
-                      <div className="bg-base-200 p-3 rounded-lg">
+                      <div className="bg-base-200 p-3 rounded-lg flex items-center justify-between">
                         <code className="text-xs break-all">
-                          {user.walletAddress}
+                          {walletService.formatAddress(user.walletAddress)}
                         </code>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={copyWalletAddress}
+                            className="btn btn-ghost btn-xs"
+                            title="Copy full address"
+                          >
+                            <FaExternalLinkAlt />
+                          </button>
+                          <button
+                            onClick={handleDisconnectWallet}
+                            className="btn btn-ghost btn-xs btn-error"
+                            title="Disconnect wallet"
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
                       </div>
                       <div className="badge badge-success mt-2">
-                        ✓ Verified
+                        ✓ Ready for blockchain voting
                       </div>
                     </div>
                   ) : (
                     <div>
                       <p className="text-base-content/70 mb-4">
-                        Connect your wallet to participate in blockchain voting
+                        Connect your MetaMask wallet to participate in blockchain voting
                       </p>
-                      <button className="btn btn-accent btn-block">
+                      <button 
+                        onClick={handleConnectWallet}
+                        className="btn btn-accent btn-block"
+                        disabled={isLoading}
+                      >
                         <FaWallet className="mr-2" />
-                        Connect Wallet
+                        {isLoading ? 'Connecting...' : 'Connect Wallet'}
                       </button>
+                      <div className="mt-2 text-xs text-base-content/60 flex items-center">
+                        <FaLink className="mr-1" />
+                        Supports MetaMask and other Web3 wallets
+                      </div>
                     </div>
                   )}
                 </div>
@@ -560,8 +667,16 @@ const ProfilePage = () => {
                     <FaHistory className="mr-2" />
                     View Vote History
                   </button>
-                  <button className="btn btn-outline btn-block">
-                    <FaTrophy className="mr-2" />
+                  <button 
+                    className="btn btn-outline btn-block"
+                    onClick={fetchBlockchainNFTs}
+                    disabled={loadingNFTs || !user?.walletAddress}
+                  >
+                    {loadingNFTs ? (
+                      <span className="loading loading-spinner mr-2"></span>
+                    ) : (
+                      <FaTrophy className="mr-2" />
+                    )}
                     My NFT Collection
                   </button>
                   <button className="btn btn-outline btn-block">
@@ -574,6 +689,96 @@ const ProfilePage = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* NFT Collection Modal */}
+      {showNFTModal && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-4xl">
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <FaTrophy className="text-warning" />
+              My NFT Collection
+              <div className="badge badge-primary ml-2">{blockchainNFTs.length} NFTs</div>
+            </h3>
+
+            <div className="tabs tabs-boxed mb-4">
+              <a className="tab tab-active">Blockchain NFTs</a>
+              <a className="tab">Database Records</a>
+            </div>
+
+            {blockchainNFTs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {blockchainNFTs.map((nft, index) => (
+                  <div key={nft.tokenId} className="card bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
+                    <div className="card-body p-4">
+                      <h4 className="font-bold flex items-center gap-2">
+                        <FaCertificate className="text-success" />
+                        Voting NFT #{nft.tokenId}
+                      </h4>
+                      <div className="text-sm space-y-1">
+                        <div>
+                          <span className="opacity-70">Type:</span> {nft.type}
+                        </div>
+                        <div>
+                          <span className="opacity-70">Token ID:</span> 
+                          <code className="bg-base-300 px-1 ml-1 rounded">{nft.tokenId}</code>
+                        </div>
+                        <div>
+                          <span className="opacity-70">Contract:</span>
+                          <code className="bg-base-300 px-1 ml-1 rounded text-xs">
+                            {nft.contractAddress.substring(0, 10)}...
+                          </code>
+                        </div>
+                      </div>
+                      <div className="card-actions justify-end mt-2">
+                        <div className="badge badge-success badge-sm">Minted</div>
+                        <div className="badge badge-outline badge-sm">On-Chain</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FaTrophy className="text-6xl opacity-30 mx-auto mb-4" />
+                <p className="text-lg font-medium">No NFTs Found</p>
+                <p className="text-sm opacity-70">Vote in elections to earn NFT badges!</p>
+              </div>
+            )}
+
+            {/* Database NFTs for comparison */}
+            {user?.nftBadges && user.nftBadges.length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2">Database Records ({user.nftBadges.length})</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {user.nftBadges.map((badge, index) => (
+                    <div key={index} className="bg-base-200 p-3 rounded-lg text-sm">
+                      <div>Election: {badge.electionId}</div>
+                      <div>Type: {badge.badgeType}</div>
+                      <div>Minted: {new Date(badge.mintedAt).toLocaleDateString()}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="modal-action">
+              <button 
+                className="btn btn-primary"
+                onClick={() => window.open(`https://localhost:8545`, '_blank')}
+              >
+                <FaExternalLinkAlt className="mr-2" />
+                View on Block Explorer
+              </button>
+              <button 
+                className="btn"
+                onClick={() => setShowNFTModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
