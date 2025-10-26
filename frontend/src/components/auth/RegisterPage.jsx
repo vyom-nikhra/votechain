@@ -15,6 +15,7 @@ import {
   FaLock,
   FaRocket
 } from 'react-icons/fa';
+import BlurryBlob from '../animata/background/blurry-blob';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -91,322 +92,271 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="hero-content flex-col lg:flex-row gap-12">
-          <motion.div 
-            className="text-center lg:text-left lg:flex-1"
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="flex items-center gap-3 justify-center lg:justify-start mb-6">
-              <FaRocket className="text-4xl text-white" />
-              <h1 className="text-5xl font-bold text-white">
-                Join VoteChain!
-              </h1>
-            </div>
-            <p className="text-xl text-white/90 mb-8 max-w-lg">
-              Be part of the democratic revolution. Create your account and start 
-              participating in secure, blockchain-powered elections.
-            </p>
-            <div className="grid gap-4 text-white/80 max-w-md mx-auto lg:mx-0">
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-white/10 backdrop-blur-sm">
-                <FaBolt className="text-2xl text-yellow-300 flex-shrink-0" />
-                <span className="text-lg">Instant account verification</span>
-              </div>
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-white/10 backdrop-blur-sm">
-                <FaChartLine className="text-2xl text-blue-300 flex-shrink-0" />
-                <span className="text-lg">Personalized voting dashboard</span>
-              </div>
-              <div className="flex items-center gap-4 p-3 rounded-lg bg-white/10 backdrop-blur-sm">
-                <FaTrophy className="text-2xl text-orange-300 flex-shrink-0" />
-                <span className="text-lg">Earn NFT badges for participation</span>
-              </div>
-            </div>
-          </motion.div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black relative overflow-hidden">
+      {/* BlurryBlob Background Animation */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
+        <BlurryBlob
+          className="opacity-70"
+          firstBlobColor="bg-blue-500"
+          secondBlobColor="bg-purple-500"
+        />
+      </div>
 
-          <motion.div 
-            className="card flex-shrink-0 w-full max-w-2xl shadow-2xl bg-base-100 lg:flex-1 border border-base-300"
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-        <form className="card-body p-8" onSubmit={handleSubmit}>
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="avatar placeholder">
-                <div className="bg-primary text-primary-content rounded-full w-12">
-                  <FaRocket className="text-2xl" />
+      <div className="container mx-auto px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <Link to="/" className="btn btn-ghost text-lg text-white hover:text-blue-400">
+            ← Back to Home
+          </Link>
+        </div>
+
+        <div className="max-w-7xl mx-auto">
+          <div className="hero-content flex-col lg:flex-row gap-12">
+            <motion.div 
+              className="text-center lg:text-left lg:flex-1"
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="flex items-center gap-3 justify-center lg:justify-start mb-6">
+                <FaRocket className="text-4xl text-blue-400" />
+                <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  Join VoteChain!
+                </h1>
+              </div>
+              <p className="text-xl text-gray-300 mb-8 max-w-lg">
+                Be part of the democratic revolution. Create your account and start 
+                participating in secure, blockchain-powered elections.
+              </p>
+              <div className="grid gap-4 text-white/80 max-w-md mx-auto lg:mx-0">
+                <div className="flex items-center gap-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 backdrop-blur-sm">
+                  <FaBolt className="text-2xl text-yellow-300 flex-shrink-0" />
+                  <span className="text-lg text-white">Instant account verification</span>
+                </div>
+                <div className="flex items-center gap-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm">
+                  <FaChartLine className="text-2xl text-blue-300 flex-shrink-0" />
+                  <span className="text-lg text-white">Personalized voting dashboard</span>
+                </div>
+                <div className="flex items-center gap-4 p-3 rounded-lg bg-orange-500/10 border border-orange-500/20 backdrop-blur-sm">
+                  <FaTrophy className="text-2xl text-orange-300 flex-shrink-0" />
+                  <span className="text-lg text-white">Earn NFT badges for participation</span>
                 </div>
               </div>
-              <h2 className="text-3xl font-bold text-base-content">Create Account</h2>
-            </div>
-            <p className="text-base-content/70 text-lg">
-              Join the blockchain voting revolution
-            </p>
-            <div className="divider my-6"></div>
-          </div>
+            </motion.div>
 
-          {/* Name Fields */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium flex items-center gap-2">
-                  <FaUser className="text-sm" />
-                  First Name
-                </span>
-              </label>
-              <input
-                type="text"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                placeholder="John"
-                className="input input-bordered focus:input-primary"
-                required
-              />
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium flex items-center gap-2">
-                  <FaUser className="text-sm" />
-                  Last Name
-                </span>
-              </label>
-              <input
-                type="text"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="Doe"
-                className="input input-bordered focus:input-primary"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Contact Information */}
-          <div className="form-section mb-6">
-            <h3 className="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
-              <FaEnvelope className="text-primary" />
-              Contact Information
-            </h3>
-
-          {/* Email Field */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium flex items-center gap-2">
-                <FaEnvelope className="text-sm" />
-                University Email
-              </span>
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="john.doe@university.edu"
-              className="input input-bordered focus:input-primary"
-              required
-            />
-          </div>
-
-          {/* Student ID Field */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium flex items-center gap-2">
-                <FaIdCard className="text-sm" />
-                Student ID
-              </span>
-            </label>
-            <input
-              type="text"
-              name="studentId"
-              value={formData.studentId}
-              onChange={handleChange}
-              placeholder="STU2024001"
-              className="input input-bordered focus:input-primary"
-              required
-            />
-          </div>
-
-          </div>
-
-          {/* Academic Information */}
-          <div className="form-section mb-6">
-            <h3 className="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
-              <FaIdCard className="text-primary" />
-              Academic Information
-            </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium flex items-center gap-2">
-                  <FaChartLine className="text-sm" />
-                  Department
-                </span>
-              </label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="select select-bordered focus:select-primary"
-                required
-              >
-                <option value="">Select Department</option>
-                <option value="Computer Science">Computer Science</option>
-                <option value="Information Technology">Information Technology</option>
-                <option value="Electronics">Electronics & Communication</option>
-                <option value="Mechanical">Mechanical Engineering</option>
-                <option value="Civil">Civil Engineering</option>
-                <option value="Business">Business Administration</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-medium flex items-center gap-2">
-                  <FaTrophy className="text-sm" />
-                  Academic Year
-                </span>
-              </label>
-              <select
-                name="year"
-                value={formData.year}
-                onChange={handleChange}
-                className="select select-bordered focus:select-primary"
-                required
-              >
-                <option value="">Select Year</option>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
-              </select>
-            </div>
-          </div>
-          </div>
-
-          {/* Security Section */}
-          <div className="form-section mb-6">
-            <h3 className="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
-              <FaLock className="text-primary" />
-              Security
-            </h3>
-
-          {/* Password Field */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium flex items-center gap-2">
-                <FaLock className="text-sm" />
-                Password
-              </span>
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Minimum 6 characters"
-                className="input input-bordered focus:input-primary w-full pr-12"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-3 flex items-center text-base-content/40 hover:text-primary transition-colors"
-              >
-                {showPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password Field */}
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium flex items-center gap-2">
-                <FaLock className="text-sm" />
-                Confirm Password
-              </span>
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Re-enter your password"
-                className="input input-bordered focus:input-primary w-full pr-12"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute inset-y-0 right-3 flex items-center text-base-content/40 hover:text-primary transition-colors"
-              >
-                {showConfirmPassword ? <FaEyeSlash className="text-lg" /> : <FaEye className="text-lg" />}
-              </button>
-            </div>
-          </div>
-          </div>
-
-          {/* Terms and Actions */}
-          <div className="form-section">
-          {/* Terms Checkbox */}
-          <div className="form-control">
-            <label className="cursor-pointer label justify-start space-x-3">
-              <input
-                type="checkbox"
-                name="acceptTerms"
-                checked={formData.acceptTerms}
-                onChange={handleChange}
-                className="checkbox checkbox-primary"
-                required
-              />
-              <span className="label-text">
-                I accept the{' '}
-                <a href="#" className="link text-primary">Terms of Service</a>
-                {' '}and{' '}
-                <a href="#" className="link text-primary">Privacy Policy</a>
-              </span>
-            </label>
-          </div>
-
-          {/* Register Button */}
-          <div className="form-control mt-8">
-            <button 
-              type="submit" 
-              className="btn btn-primary btn-lg text-white font-semibold"
-              disabled={isLoading}
+            <motion.div 
+              className="w-full max-w-2xl lg:flex-1"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
             >
-              {isLoading ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  <FaRocket className="text-lg" />
-                  Create Account
-                </>
-              )}
-            </button>
-          </div>
+              <form className="bg-white rounded-3xl p-8 shadow-2xl" onSubmit={handleSubmit}>
+                {/* Name Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="flex flex-col">
+                    <label className="text-gray-800 font-semibold mb-2">First Name</label>
+                    <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                      <FaUser className="text-gray-400" />
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        placeholder="John"
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-gray-800 font-semibold mb-2">Last Name</label>
+                    <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                      <FaUser className="text-gray-400" />
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        placeholder="Doe"
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
 
-          {/* Login Link */}
-          <div className="text-center mt-4">
-            <p className="text-base-content/60">
-              Already have an account?{' '}
-              <Link to="/login" className="link text-primary font-medium">
-                Sign in here
-              </Link>
-            </p>
+                {/* Email Field */}
+                <div className="flex flex-col mb-4">
+                  <label className="text-gray-800 font-semibold mb-2">University Email</label>
+                  <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                    <FaEnvelope className="text-gray-400" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="john.doe@university.edu"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Student ID Field */}
+                <div className="flex flex-col mb-4">
+                  <label className="text-gray-800 font-semibold mb-2">Student ID</label>
+                  <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                    <FaIdCard className="text-gray-400" />
+                    <input
+                      type="text"
+                      name="studentId"
+                      value={formData.studentId}
+                      onChange={handleChange}
+                      placeholder="STU2024001"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Academic Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="flex flex-col">
+                    <label className="text-gray-800 font-semibold mb-2">Department</label>
+                    <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                      <FaChartLine className="text-gray-400" />
+                      <select
+                        name="department"
+                        value={formData.department}
+                        onChange={handleChange}
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-transparent"
+                        required
+                      >
+                        <option value="">Select Department</option>
+                        <option value="Computer Science">Computer Science</option>
+                        <option value="Information Technology">Information Technology</option>
+                        <option value="Electronics">Electronics & Communication</option>
+                        <option value="Mechanical">Mechanical Engineering</option>
+                        <option value="Civil">Civil Engineering</option>
+                        <option value="Business">Business Administration</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <label className="text-gray-800 font-semibold mb-2">Academic Year</label>
+                    <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                      <FaTrophy className="text-gray-400" />
+                      <select
+                        name="year"
+                        value={formData.year}
+                        onChange={handleChange}
+                        className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800 bg-transparent"
+                        required
+                      >
+                        <option value="">Select Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Password Fields */}
+                <div className="flex flex-col mb-4">
+                  <label className="text-gray-800 font-semibold mb-2">Password</label>
+                  <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                    <FaLock className="text-gray-400" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Minimum 6 characters"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-400 hover:text-blue-500 transition-colors"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-col mb-4">
+                  <label className="text-gray-800 font-semibold mb-2">Confirm Password</label>
+                  <div className="border-2 border-gray-200 rounded-xl h-12 flex items-center px-3 focus-within:border-blue-500 transition-colors">
+                    <FaLock className="text-gray-400" />
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Re-enter your password"
+                      className="ml-3 rounded-xl border-none w-full h-full focus:outline-none text-gray-800"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="text-gray-400 hover:text-blue-500 transition-colors"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Terms Checkbox */}
+                <div className="flex items-start mb-6">
+                  <input
+                    type="checkbox"
+                    name="acceptTerms"
+                    checked={formData.acceptTerms}
+                    onChange={handleChange}
+                    className="mt-1 mr-2"
+                    required
+                  />
+                  <label className="text-sm text-gray-800">
+                    I accept the{' '}
+                    <a href="#" className="text-blue-500 hover:text-blue-600 font-medium">Terms of Service</a>
+                    {' '}and{' '}
+                    <a href="#" className="text-blue-500 hover:text-blue-600 font-medium">Privacy Policy</a>
+                  </label>
+                </div>
+
+                {/* Register Button */}
+                <button 
+                  type="submit" 
+                  className="w-full h-12 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-xl transition-colors mb-4"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      Creating account...
+                    </>
+                  ) : (
+                    'Create Account'
+                  )}
+                </button>
+
+                {/* Login Link */}
+                <div className="text-center">
+                  <p className="text-gray-800 text-sm">
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-blue-500 hover:text-blue-600 font-medium">
+                      Sign in here
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </motion.div>
           </div>
-          </div>
-        </form>
-          </motion.div>
         </div>
       </div>
     </div>
