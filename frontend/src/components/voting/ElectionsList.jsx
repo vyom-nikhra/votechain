@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { electionsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../common/Breadcrumbs';
 import { 
   FaPlus, 
   FaVoteYea, 
@@ -207,26 +208,35 @@ const ElectionsList = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Breadcrumbs */}
+        <Breadcrumbs customItems={[{ label: 'Elections' }]} />
+
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
-              <FaVoteYea className="text-primary" />
-              Elections
-            </h1>
-            <p className="text-base-content/70 text-lg mt-2">
-              Participate in democratic decisions and shape your university
-            </p>
+        <div className="mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-3 flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl">
+                  <FaVoteYea className="text-2xl text-primary" />
+                </div>
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Elections
+                </span>
+              </h1>
+              <p className="text-base-content/70 text-lg ml-16">
+                Participate in democratic decisions and shape your university
+              </p>
+            </div>
+            {user?.role === 'admin' && (
+              <button 
+                className="btn btn-primary hover:scale-105 transition-transform"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <FaPlus className="mr-2" />
+                Create Election
+              </button>
+            )}
           </div>
-          {user?.role === 'admin' && (
-            <button 
-              className="btn btn-primary"
-              onClick={() => setShowCreateModal(true)}
-            >
-              <FaPlus className="mr-2" />
-              Create Election
-            </button>
-          )}
         </div>
 
         {/* Filters */}
@@ -299,19 +309,25 @@ const ElectionsList = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredElections.map((election, index) => (
-              <motion.div
-                key={election._id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="card bg-base-100 shadow-xl hover:shadow-2xl transition-shadow"
-              >
-                <div className="card-body">
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 className="card-title text-lg">{election.title}</h3>
-                    {getStatusBadge(election)}
-                  </div>
+            {filteredElections.map((election, index) => {
+              const status = getElectionStatus(election);
+              const borderColor = status.status === 'active' ? 'border-green-500/20 hover:border-green-400/50 hover:shadow-green-500/20' 
+                : status.status === 'upcoming' ? 'border-blue-500/20 hover:border-blue-400/50 hover:shadow-blue-500/20'
+                : 'border-gray-700 hover:border-gray-600';
+              
+              return (
+                <motion.div
+                  key={election._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className={`card bg-base-100 shadow-xl border-[0.5px] ${borderColor} transition-all duration-300 group`}
+                >
+                  <div className="card-body">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="card-title text-lg group-hover:text-primary transition-colors">{election.title}</h3>
+                      {getStatusBadge(election)}
+                    </div>
                   
                   <p className="text-base-content/70 mb-4 line-clamp-3">
                     {election.description}
@@ -402,7 +418,8 @@ const ElectionsList = () => {
                   </div>
                 </div>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         )}
       </motion.div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import walletService from '../../services/walletService';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../common/Breadcrumbs';
 import { 
   FaUser, 
   FaEdit, 
@@ -21,7 +22,10 @@ import {
   FaShieldAlt,
   FaLink,
   FaExternalLinkAlt,
-  FaCertificate
+  FaCertificate,
+  FaCog,
+  FaChartBar,
+  FaVoteYea
 } from 'react-icons/fa';
 
 const ProfilePage = () => {
@@ -238,59 +242,71 @@ const ProfilePage = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
+        {/* Breadcrumbs */}
+        <Breadcrumbs customItems={[{ label: 'Profile' }]} />
+
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-base-content">My Profile</h1>
-            <p className="text-base-content/70 text-lg mt-2">
-              Manage your account settings and preferences
-            </p>
-          </div>
-          <div className="flex gap-3">
-            {!editMode ? (
-              <button 
-                className="btn btn-primary"
-                onClick={() => setEditMode(true)}
-              >
-                <FaEdit className="mr-2" />
-                Edit Profile
-              </button>
-            ) : (
-              <div className="flex gap-2">
+        <div className="mb-8">
+          <div className="flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-3 flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl">
+                  <FaUser className="text-2xl text-primary" />
+                </div>
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  My Profile
+                </span>
+              </h1>
+              <p className="text-base-content/70 text-lg ml-16">
+                Manage your account settings and preferences
+              </p>
+            </div>
+            <div className="flex gap-3">
+              {!editMode ? (
                 <button 
-                  className="btn btn-success"
-                  onClick={handleSaveProfile}
-                  disabled={isLoading}
+                  className="btn btn-primary hover:scale-105 transition-transform"
+                  onClick={() => setEditMode(true)}
                 >
-                  <FaSave className="mr-2" />
-                  Save Changes
+                  <FaEdit className="mr-2" />
+                  Edit Profile
                 </button>
-                <button 
-                  className="btn btn-ghost"
-                  onClick={cancelEdit}
-                >
-                  <FaTimes className="mr-2" />
-                  Cancel
-                </button>
-              </div>
-            )}
+              ) : (
+                <div className="flex gap-2">
+                  <button 
+                    className="btn btn-success hover:scale-105 transition-transform"
+                    onClick={handleSaveProfile}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <span className="loading loading-spinner loading-sm"></span> : <FaSave className="mr-2" />}
+                    Save
+                  </button>
+                  <button 
+                    className="btn btn-ghost hover:scale-105 transition-transform"
+                    onClick={cancelEdit}
+                  >
+                    <FaTimes className="mr-2" />
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Profile Info */}
           <div className="lg:col-span-2 space-y-6">
             {/* Profile Card */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow-xl border-[0.5px] border-blue-500/20 hover:border-purple-400/40 hover:shadow-blue-500/10 transition-all duration-300">
               <div className="card-body">
                 <div className="flex items-center mb-6">
                   <div className="avatar placeholder mr-4">
-                    <div className="bg-primary text-primary-content rounded-full w-20">
+                    <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-blue-400 rounded-full w-20 flex items-center justify-center">
                       <FaUser className="text-3xl" />
                     </div>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                       {profileData.firstName} {profileData.lastName}
                     </h2>
                     <p className="text-base-content/70">{profileData.email}</p>
@@ -433,11 +449,15 @@ const ProfilePage = () => {
             </div>
 
             {/* Security Settings */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow-xl border-[0.5px] border-yellow-500/20 hover:border-yellow-400/40 hover:shadow-yellow-500/10 transition-all duration-300">
               <div className="card-body">
-                <h3 className="card-title flex items-center gap-2">
-                  <FaShieldAlt className="text-primary" />
-                  Security Settings
+                <h3 className="card-title text-xl mb-4 flex items-center gap-2">
+                  <div className="p-2 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-lg">
+                    <FaLock className="text-yellow-400" />
+                  </div>
+                  <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                    Security Settings
+                  </span>
                 </h3>
 
                 <div className="divider"></div>
@@ -557,55 +577,60 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Right Column - Stats and Activity */}
+          {/* Right Column - Stats & Actions */}
           <div className="space-y-6">
-            {/* Account Stats */}
-            <div className="card bg-base-100 shadow-xl">
+            {/* Profile Stats */}
+            <div className="card bg-base-100 shadow-xl border-[0.5px] border-green-500/20 hover:border-green-400/40 hover:shadow-green-500/10 transition-all duration-300">
               <div className="card-body">
-                <h3 className="card-title">Account Statistics</h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <FaTrophy className="text-warning" />
-                      <span>NFT Badges</span>
+                <h3 className="card-title text-xl mb-4 flex items-center gap-2">
+                  <div className="p-2 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-lg">
+                    <FaChartBar className="text-green-400" />
+                  </div>
+                  <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                    Activity Stats
+                  </span>
+                </h3>
+                <div className="divider"></div>
+                <div className="stats stats-vertical shadow bg-base-200">
+                  <div className="stat">
+                    <div className="stat-figure text-primary">
+                      <FaVoteYea className="text-3xl" />
                     </div>
-                    <div className="badge badge-warning">{stats.nftBadges}</div>
+                    <div className="stat-title">Total Votes</div>
+                    <div className="stat-value text-primary">{stats.totalVotes}</div>
                   </div>
                   
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <FaHistory className="text-success" />
-                      <span>Total Votes</span>
+                  <div className="stat">
+                    <div className="stat-figure text-secondary">
+                      <FaTrophy className="text-3xl" />
                     </div>
-                    <div className="badge badge-success">{stats.totalVotes}</div>
+                    <div className="stat-title">NFT Badges</div>
+                    <div className="stat-value text-secondary">{stats.nftBadges}</div>
                   </div>
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <FaCalendarAlt className="text-info" />
-                      <span>Member Since</span>
+                  
+                  <div className="stat">
+                    <div className="stat-figure text-accent">
+                      <FaCalendarAlt className="text-3xl" />
                     </div>
-                    <span className="text-sm">{stats.joinedDate}</span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <FaUser className="text-primary" />
-                      <span>Last Login</span>
-                    </div>
-                    <span className="text-sm">{stats.lastLogin}</span>
+                    <div className="stat-title">Member Since</div>
+                    <div className="stat-value text-sm">{stats.joinedDate}</div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Wallet Connection */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow-xl border-[0.5px] border-pink-500/20 hover:border-pink-400/40 hover:shadow-pink-500/10 transition-all duration-300">
               <div className="card-body">
                 <h3 className="card-title flex items-center gap-2">
-                  <FaWallet className="text-accent" />
-                  Blockchain Wallet
+                  <div className="p-2 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-lg">
+                    <FaWallet className="text-pink-400" />
+                  </div>
+                  <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                    Blockchain Wallet
+                  </span>
                 </h3>
+                <div className="divider"></div>
                 <div className="space-y-4">
                   {user?.walletAddress ? (
                     <div>
@@ -659,9 +684,16 @@ const ProfilePage = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="card bg-base-100 shadow-xl">
+            <div className="card bg-base-100 shadow-xl border-[0.5px] border-cyan-500/20 hover:border-cyan-400/40 hover:shadow-cyan-500/10 transition-all duration-300">
               <div className="card-body">
-                <h3 className="card-title">Quick Actions</h3>
+                <h3 className="card-title text-xl mb-4 flex items-center gap-2">
+                  <div className="p-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg">
+                    <FaCog className="text-cyan-400" />
+                  </div>
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                    Quick Actions
+                  </span>
+                </h3>
                 <div className="space-y-2">
                   <button className="btn btn-outline btn-block">
                     <FaHistory className="mr-2" />

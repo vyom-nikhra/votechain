@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import { analyticsAPI, usersAPI, electionsAPI } from '../../services/api';
 import toast from 'react-hot-toast';
+import Breadcrumbs from '../common/Breadcrumbs';
 import { 
   FaUsers, 
   FaVoteYea, 
@@ -361,35 +362,46 @@ const AdminPanel = () => {
         initial="hidden"
         animate="visible"
       >
+        {/* Breadcrumbs */}
+        <Breadcrumbs customItems={[{ label: 'Admin Panel' }]} />
+
         {/* Header */}
-        <motion.div variants={itemVariants} className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-base-content flex items-center gap-3">
-              <FaUserShield className="text-primary" />
-              Admin Panel
-            </h1>
-            <p className="text-base-content/70 text-lg mt-2">
-              Manage users, elections, and system settings
-            </p>
-          </div>
-          <div className="badge badge-primary badge-lg">
-            <FaCrown className="mr-1" />
-            Administrator
+        <motion.div variants={itemVariants} className="mb-10">
+          <div className="flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-3 flex items-center gap-3">
+                <div className="p-3 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl">
+                  <FaUserShield className="text-3xl text-primary" />
+                </div>
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Admin Panel
+                </span>
+              </h1>
+              <p className="text-base-content/70 text-lg ml-16">
+                Comprehensive system management and oversight
+              </p>
+            </div>
+            <div className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-xl border border-primary/30">
+              <FaCrown className="text-primary text-lg" />
+              <span className="font-bold text-primary">Administrator</span>
+            </div>
           </div>
         </motion.div>
 
         {/* Tabs */}
-        <motion.div variants={itemVariants} className="tabs tabs-boxed mb-8">
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              className={`tab ${activeTab === tab.id ? 'tab-active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              <tab.icon className="mr-2" />
-              {tab.label}
-            </button>
-          ))}
+        <motion.div variants={itemVariants} className="mb-8">
+          <div className="tabs tabs-boxed bg-base-200 p-1">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                className={`tab gap-2 ${activeTab === tab.id ? 'tab-active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <tab.icon />
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
         {/* Overview Tab */}
@@ -404,96 +416,127 @@ const AdminPanel = () => {
             )}
             
             {/* System Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="stat bg-base-100 rounded-lg shadow-lg">
-                <div className="stat-figure text-primary">
-                  <FaUsers className="text-3xl" />
-                </div>
-                <div className="stat-title">Total Users</div>
-                <div className="stat-value text-primary">
-                  {statsLoading ? (
-                    <span className="loading loading-spinner"></span>
-                  ) : (
-                    systemStats?.overview?.totalUsers || systemStats?.totalUsers || 0
-                  )}
-                </div>
-                <div className="stat-desc">
-                  {systemStats?.overview?.recentRegistrations || 0} new this month
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              <div className="card bg-base-100 shadow-xl border-[0.5px] border-blue-500/20 hover:border-blue-400/50 hover:shadow-blue-500/20 transition-all duration-300 group">
+                <div className="card-body p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                        <FaUsers className="text-primary" />
+                        Total Users
+                      </p>
+                      <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        {statsLoading ? (
+                          <span className="loading loading-spinner loading-sm"></span>
+                        ) : (
+                          systemStats?.overview?.totalUsers || systemStats?.totalUsers || 0
+                        )}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <FaUsers className="text-2xl text-blue-400" />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="stat bg-base-100 rounded-lg shadow-lg">
-                <div className="stat-figure text-success">
-                  <FaVoteYea className="text-3xl" />
+              <div className="card bg-base-100 shadow-xl border-[0.5px] border-green-500/20 hover:border-green-400/50 hover:shadow-green-500/20 transition-all duration-300 group">
+                <div className="card-body p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                        <FaVoteYea className="text-success" />
+                        Total Elections
+                      </p>
+                      <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                        {statsLoading ? (
+                          <span className="loading loading-spinner loading-sm"></span>
+                        ) : (
+                          systemStats?.overview?.totalElections || systemStats?.totalElections || 0
+                        )}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <FaVoteYea className="text-2xl text-green-400" />
+                    </div>
+                  </div>
                 </div>
-                <div className="stat-title">Total Elections</div>
-                <div className="stat-value text-success">
-                  {statsLoading ? (
-                    <span className="loading loading-spinner"></span>
-                  ) : (
-                    systemStats?.overview?.totalElections || systemStats?.totalElections || 0
-                  )}
-                </div>
-                <div className="stat-desc">Active elections running</div>
               </div>
 
-              <div className="stat bg-base-100 rounded-lg shadow-lg">
-                <div className="stat-figure text-warning">
-                  <FaChartLine className="text-3xl" />
+              <div className="card bg-base-100 shadow-xl border-[0.5px] border-yellow-500/20 hover:border-yellow-400/50 hover:shadow-yellow-500/20 transition-all duration-300 group">
+                <div className="card-body p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                        <FaChartLine className="text-warning" />
+                        Total Votes
+                      </p>
+                      <p className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                        {statsLoading ? (
+                          <span className="loading loading-spinner loading-sm"></span>
+                        ) : (
+                          systemStats?.overview?.totalVotes || systemStats?.totalVotes || 0
+                        )}
+                      </p>
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <FaChartLine className="text-2xl text-yellow-400" />
+                    </div>
+                  </div>
                 </div>
-                <div className="stat-title">Total Votes</div>
-                <div className="stat-value text-warning">
-                  {statsLoading ? (
-                    <span className="loading loading-spinner"></span>
-                  ) : (
-                    systemStats?.overview?.totalVotes || systemStats?.totalVotes || 0
-                  )}
-                </div>
-                <div className="stat-desc">Democracy in action</div>
               </div>
 
-              <div className="stat bg-base-100 rounded-lg shadow-lg">
-                <div className="stat-figure text-accent">
-                  <FaShieldAlt className="text-3xl" />
+              <div className="card bg-base-100 shadow-xl border-[0.5px] border-pink-500/20 hover:border-pink-400/50 hover:shadow-pink-500/20 transition-all duration-300 group">
+                <div className="card-body p-5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-base-content/60 mb-2 flex items-center gap-2">
+                        <FaShieldAlt className="text-accent" />
+                        Verification Rate
+                      </p>
+                      <p className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">
+                        {statsLoading ? (
+                          <span className="loading loading-spinner loading-sm"></span>
+                        ) : (
+                          systemStats?.overview?.verificationRate || systemStats?.verificationRate || 95
+                        )}%
+                      </p>
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-pink-500/20 to-rose-500/20 rounded-xl group-hover:scale-110 transition-transform duration-300">
+                      <FaShieldAlt className="text-2xl text-pink-400" />
+                    </div>
+                  </div>
                 </div>
-                <div className="stat-title">Verification Rate</div>
-                <div className="stat-value text-accent">
-                  {statsLoading ? (
-                    <span className="loading loading-spinner"></span>
-                  ) : (
-                    systemStats?.overview?.verificationRate || systemStats?.verificationRate || 95
-                  )}%
-                </div>
-                <div className="stat-desc">Email verified users</div>
               </div>
             </div>
 
             {/* Blockchain Status */}
-            <div className="card bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-xl">
+            <div className="card bg-base-100 border-[0.5px] border-purple-500/20 hover:border-purple-400/40 shadow-xl hover:shadow-purple-500/10 transition-all duration-300 mt-6">
               <div className="card-body">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold flex items-center gap-2">
-                      <FaCubes />
-                      Blockchain Integration Status
-                    </h3>
-                    <p className="opacity-90 mt-1">Secure, transparent, and immutable voting</p>
-                  </div>
-                  <div className="badge badge-success gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-4">
+                  <h3 className="card-title text-xl flex items-center gap-2">
+                    <div className="p-2 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg">
+                      <FaCubes className="text-primary" />
+                    </div>
+                    <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                      Blockchain Status
+                    </span>
+                  </h3>
+                  <div className="badge badge-success gap-2 px-4 py-3">
+                    <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
                     Connected
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  <div className="bg-white/10 rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <FaLock className="text-sm" />
-                      <span className="text-sm font-semibold">Smart Contracts</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-base-100/10 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <FaLock />
+                      <span className="font-semibold">Smart Contracts</span>
                     </div>
-                    <div className="text-xs opacity-80">
-                      Voting: 0x9fE4...a6e0<br/>
-                      NFT: 0xe7f1...0512<br/>
+                    <div className="text-xs opacity-90 space-y-1">
+                      <div>Voting: 0x9fE4...a6e0</div>
+                      <div>NFT: 0xe7f1...0512</div>
                       ZK: 0x5FbD...0aa3
                     </div>
                   </div>

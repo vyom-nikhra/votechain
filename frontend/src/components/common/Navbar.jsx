@@ -3,7 +3,6 @@ import { useAuthStore } from '../../store/authStore';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { 
-  MdDarkMode, 
   MdNotifications, 
   MdLogout, 
   MdPerson, 
@@ -108,22 +107,8 @@ const Navbar = () => {
             </motion.div>
           )}
 
-          {/* Right side - Theme toggle, Notifications, User menu */}
+          {/* Right side - Notifications, User menu */}
           <div className="flex items-center space-x-4">
-          {/* Theme Toggle */}
-          <div className="dropdown dropdown-end">
-            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">
-              <MdDarkMode className="text-xl" />
-            </div>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-40 border border-base-300">
-              <li><button data-set-theme="votechain" data-act-class="active">Default</button></li>
-              <li><button data-set-theme="dark" data-act-class="active">Dark</button></li>
-              <li><button data-set-theme="light" data-act-class="active">Light</button></li>
-              <li><button data-set-theme="cupcake" data-act-class="active">Cupcake</button></li>
-              <li><button data-set-theme="cyberpunk" data-act-class="active">Cyberpunk</button></li>
-            </ul>
-          </div>
-
           {/* Notifications */}
           <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle">

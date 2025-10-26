@@ -73,3 +73,136 @@ html {
 .animated-btn .c4 { transform: translate(3.5em, 1.4em); }
 .animated-btn .c5 { transform: translate(3.5em, -3.8em); }
 .animated-btn:hover .circle { transform: translate(-50%, -50%) scale(4); transition: transform 1.5s ease; }
+
+/* New Orbital Loader Styles with VoteChain Theme */
+.custom-loader {
+  position: relative;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(59, 130, 246, 0.05) 30%,
+    transparent 70%
+  );
+  overflow: hidden;
+}
+
+/* Outside circle */
+.custom-loader::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  border-top-color: rgba(59, 130, 246, 0.8);
+  border-right-color: rgba(168, 85, 247, 0.4);
+  animation: loader-spin 2s linear infinite;
+}
+
+/* Rotating gradient circle */
+.custom-loader::after {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 90deg,
+    rgba(59, 130, 246, 0.3),
+    rgba(168, 85, 247, 0.2),
+    transparent
+  );
+  filter: blur(2px);
+  animation: loader-spin-reverse 1.5s linear infinite;
+}
+
+/* Center circle */
+.loader__inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20%;
+  height: 20%;
+  background: linear-gradient(135deg, #3b82f6, #a855f7);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.6),
+              0 0 40px rgba(168, 85, 247, 0.3);
+  animation: loader-pulse 1s ease-in-out infinite;
+}
+
+/* Orbit container */
+.loader__orbit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: orbit-rotate 3s linear infinite;
+}
+
+/* Orbit dots */
+.loader__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6%;
+  height: 6%;
+  background: linear-gradient(135deg, #3b82f6, #a855f7);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
+}
+
+/* Position 4 dots around the orbit */
+.loader__dot:nth-child(1) {
+  transform: rotate(0deg) translate(30%);
+  animation-delay: 0s;
+}
+.loader__dot:nth-child(2) {
+  transform: rotate(90deg) translate(30%);
+  animation-delay: 0.2s;
+}
+.loader__dot:nth-child(3) {
+  transform: rotate(180deg) translate(30%);
+  animation-delay: 0.4s;
+}
+.loader__dot:nth-child(4) {
+  transform: rotate(270deg) translate(30%);
+  animation-delay: 0.6s;
+}
+
+/* Animations */
+@keyframes loader-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-spin-reverse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes loader-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+@keyframes orbit-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
