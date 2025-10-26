@@ -5,6 +5,7 @@ import Election from '../models/Election.js';
 import Vote from '../models/Vote.js';
 import User from '../models/User.js';
 import { authMiddleware, verifiedEmailMiddleware, walletConnectedMiddleware } from '../middleware/auth.js';
+import blockchainService from '../utils/blockchain.js';
 
 const router = express.Router();
 
@@ -238,6 +239,10 @@ router.post('/', [
       transactionHash: crypto.randomBytes(32).toString('hex'), // Temporary
       blockNumber: 0, // Will be updated
       
+      // Required integrity hashes
+      voteHash: crypto.createHash('sha256').update(JSON.stringify(voteData) + electionId + user._id.toString()).digest('hex'),
+      nullifierHash: crypto.createHash('sha256').update(user._id.toString() + electionId).digest('hex'),
+      
       // Voter metadata for analytics (anonymized)
       voterMetadata: {
         department: user.department,
@@ -253,6 +258,38 @@ router.post('/', [
     });
 
     await vote.save();
+
+    // 🔗 BLOCKCHAIN INTEGRATION: Record vote on blockchain
+    if (election.contractAddress) {
+      try {
+        const blockchainResult = await blockchainService.castVoteOnChain({
+          blockchainElectionId: election.contractAddress, // Using contract address as ID for now
+          voteHash: vote.voteHash,
+          nullifierHash: vote.nullifierHash
+        });
+
+        if (blockchainResult.success) {
+          // Update vote with blockchain transaction details
+          vote.transactionHash = blockchainResult.transactionHash;
+          vote.blockNumber = blockchainResult.blockNumber;
+          vote.gasUsed = blockchainResult.gasUsed;
+          await vote.save();
+          
+          console.log('✅ Vote recorded on blockchain:', blockchainResult.transactionHash);
+
+          // 🏅 Mint NFT badge for voter
+          if (user.walletAddress) {
+            const nftResult = await blockchainService.mintVoterNFT(user.walletAddress, electionId);
+            if (nftResult.success) {
+              console.log('✅ Voter NFT minted:', nftResult.transactionHash);
+            }
+          }
+        }
+      } catch (blockchainError) {
+        console.warn('⚠️ Blockchain integration failed (vote still recorded):', blockchainError.message);
+        // Don't fail the vote if blockchain fails - graceful degradation
+      }
+    }
 
     // Update user's voting history
     user.votingHistory.push({

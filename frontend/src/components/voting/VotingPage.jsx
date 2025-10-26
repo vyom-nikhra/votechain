@@ -18,7 +18,11 @@ import {
   FaExclamationTriangle,
   FaTrophy,
   FaEye,
-  FaLock
+  FaLock,
+  FaCubes,
+  FaLink,
+  FaCertificate,
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 
 const VotingPage = () => {
@@ -131,7 +135,10 @@ const VotingPage = () => {
     setIsVoting(true);
     castVoteMutation.mutate({
       electionId: election._id,
-      candidateId: selectedCandidate._id
+      voteData: {
+        candidateId: selectedCandidate._id,
+        voteType: 'simple'
+      }
     });
   };
 
@@ -228,6 +235,61 @@ const VotingPage = () => {
               <p className="text-base-content/80">{election.description}</p>
             </div>
 
+            {/* Blockchain Verification */}
+            {(election.contractAddress || election.metadata?.blockchainTxHash) && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 rounded-lg border border-success/20">
+                <div className="flex items-center gap-2 mb-3">
+                  <FaCubes className="text-success" />
+                  <h4 className="font-bold text-success">Blockchain Verified Election</h4>
+                  <div className="badge badge-success badge-sm">
+                    <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1"></div>
+                    Immutable
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  {election.contractAddress && (
+                    <div className="flex items-center gap-2">
+                      <FaLink className="text-info" />
+                      <span className="opacity-70">Smart Contract:</span>
+                      <code className="bg-base-200 px-2 py-1 rounded text-xs">
+                        {election.contractAddress.substring(0, 8)}...{election.contractAddress.substring(-6)}
+                      </code>
+                      <button 
+                        onClick={() => navigator.clipboard.writeText(election.contractAddress)}
+                        className="btn btn-ghost btn-xs"
+                        title="Copy contract address"
+                      >
+                        <FaExternalLinkAlt />
+                      </button>
+                    </div>
+                  )}
+                  
+                  {election.metadata?.blockchainTxHash && (
+                    <div className="flex items-center gap-2">
+                      <FaLock className="text-warning" />
+                      <span className="opacity-70">Creation Tx:</span>
+                      <code className="bg-base-200 px-2 py-1 rounded text-xs">
+                        {election.metadata.blockchainTxHash.substring(0, 8)}...{election.metadata.blockchainTxHash.substring(-6)}
+                      </code>
+                      <button 
+                        onClick={() => navigator.clipboard.writeText(election.metadata.blockchainTxHash)}
+                        className="btn btn-ghost btn-xs"
+                        title="Copy transaction hash"
+                      >
+                        <FaExternalLinkAlt />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="mt-3 text-xs opacity-70 flex items-center gap-1">
+                  <FaCertificate />
+                  <span>Your vote will be cryptographically secured and you'll receive an NFT certificate upon voting</span>
+                </div>
+              </div>
+            )}
+
             {election.department && (
               <div className="mt-4">
                 <span className="badge badge-primary">Department: {election.department}</span>
@@ -248,17 +310,30 @@ const VotingPage = () => {
         {/* Voting Status */}
         {hasVoted ? (
           <div className="alert alert-success mb-8">
-            <FaCheck />
-            <div>
-              <h3 className="font-bold">Vote Recorded!</h3>
-              <div className="text-sm">
-                You have already voted in this election. Your vote is securely recorded on the blockchain.
+            <div className="flex items-center gap-3">
+              <FaCheck className="text-2xl" />
+              <div className="flex-1">
+                <h3 className="font-bold flex items-center gap-2">
+                  Vote Recorded! 
+                  <FaCubes className="text-sm" />
+                </h3>
+                <div className="text-sm">
+                  Your vote is securely recorded on the blockchain and you've earned an NFT voting certificate.
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="badge badge-success gap-1">
+                  <FaCertificate />
+                  NFT Earned
+                </div>
               </div>
             </div>
-            <button className="btn btn-sm btn-outline">
-              <FaEye className="mr-2" />
-              View Receipt
-            </button>
+            <div className="mt-3">
+              <button className="btn btn-sm btn-outline">
+                <FaEye className="mr-2" />
+                View Receipt
+              </button>
+            </div>
           </div>
         ) : !isElectionActive() ? (
           <div className={`alert alert-${statusInfo.color} mb-8`}>

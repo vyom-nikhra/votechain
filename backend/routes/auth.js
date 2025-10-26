@@ -529,22 +529,20 @@ router.put('/profile', [
   body('firstName')
     .optional()
     .trim()
-    .isLength({ min: 1, max: 50 })
-    .withMessage('First name must be 1-50 characters'),
+    .isLength({ min: 0, max: 50 })
+    .withMessage('First name cannot exceed 50 characters'),
   body('lastName')
     .optional()
     .trim()
-    .isLength({ min: 1, max: 50 })
-    .withMessage('Last name must be 1-50 characters'),
+    .isLength({ min: 0, max: 50 })
+    .withMessage('Last name cannot exceed 50 characters'),
   body('email')
     .optional()
     .isEmail()
     .withMessage('Please provide a valid email')
     .normalizeEmail(),
   body('department')
-    .optional()
-    .notEmpty()
-    .withMessage('Department cannot be empty'),
+    .optional(),
   body('year')
     .optional()
     .isInt({ min: 1, max: 4 })
@@ -554,9 +552,11 @@ router.put('/profile', [
     .isLength({ max: 500 })
     .withMessage('Bio cannot exceed 500 characters'),
   body('phoneNumber')
+    .optional(),
+  body('walletAddress')
     .optional()
-    .isMobilePhone()
-    .withMessage('Please provide a valid phone number')
+    .isLength({ min: 0, max: 100 })
+    .withMessage('Invalid wallet address format')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -568,7 +568,7 @@ router.put('/profile', [
       });
     }
 
-    const { firstName, lastName, email, department, year, bio, phoneNumber } = req.body;
+    const { firstName, lastName, email, department, year, bio, phoneNumber, walletAddress } = req.body;
     
     // Check if email is already taken by another user
     if (email) {
@@ -593,6 +593,7 @@ router.put('/profile', [
     if (year !== undefined) updateData.year = year;
     if (bio !== undefined) updateData.bio = bio;
     if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (walletAddress !== undefined) updateData.walletAddress = walletAddress;
 
     const user = await User.findByIdAndUpdate(
       req.user.userId,

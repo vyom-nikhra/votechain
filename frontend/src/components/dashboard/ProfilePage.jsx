@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
+import walletService from '../../services/walletService';
 import toast from 'react-hot-toast';
 import { 
   FaUser, 
@@ -17,7 +18,9 @@ import {
   FaWallet,
   FaTrophy,
   FaHistory,
-  FaShieldAlt
+  FaShieldAlt,
+  FaLink,
+  FaExternalLinkAlt
 } from 'react-icons/fa';
 
 const ProfilePage = () => {
@@ -67,7 +70,7 @@ const ProfilePage = () => {
       // Mock stats - replace with real API calls
       setStats({
         totalVotes: user.votesCount || 0,
-        nftBadges: user.nftBadges || 0,
+        nftBadges: Array.isArray(user.nftBadges) ? user.nftBadges.length : (user.nftBadges || 0),
         joinedDate: new Date(user.createdAt).toLocaleDateString(),
         lastLogin: new Date(user.lastLogin || Date.now()).toLocaleDateString()
       });
@@ -129,6 +132,58 @@ const ProfilePage = () => {
       }
     } catch (error) {
       toast.error('Failed to change password');
+    }
+  };
+
+  // Wallet connection functions
+  const handleConnectWallet = async () => {
+    try {
+      if (!walletService.isMetaMaskAvailable()) {
+        toast.error('MetaMask is not installed. Please install MetaMask to connect your wallet.');
+        window.open('https://metamask.io/download/', '_blank');
+        return;
+      }
+
+      const result = await walletService.connectWallet();
+      
+      if (result.success) {
+        // Update profile with wallet address
+        const profileUpdate = await updateProfile({
+          ...profileData,
+          walletAddress: result.address
+        });
+        
+        if (profileUpdate.success) {
+          toast.success('Wallet connected successfully!');
+        }
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to connect wallet');
+    }
+  };
+
+  const handleDisconnectWallet = async () => {
+    try {
+      await walletService.disconnectWallet();
+      
+      // Update profile to remove wallet address
+      const profileUpdate = await updateProfile({
+        ...profileData,
+        walletAddress: null
+      });
+      
+      if (profileUpdate.success) {
+        toast.success('Wallet disconnected successfully!');
+      }
+    } catch (error) {
+      toast.error('Failed to disconnect wallet');
+    }
+  };
+
+  const copyWalletAddress = () => {
+    if (user?.walletAddress) {
+      navigator.clipboard.writeText(user.walletAddress);
+      toast.success('Wallet address copied to clipboard!');
     }
   };
 
@@ -527,24 +582,48 @@ const ProfilePage = () => {
                   {user?.walletAddress ? (
                     <div>
                       <p className="text-sm text-base-content/70 mb-2">Connected Wallet:</p>
-                      <div className="bg-base-200 p-3 rounded-lg">
+                      <div className="bg-base-200 p-3 rounded-lg flex items-center justify-between">
                         <code className="text-xs break-all">
-                          {user.walletAddress}
+                          {walletService.formatAddress(user.walletAddress)}
                         </code>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={copyWalletAddress}
+                            className="btn btn-ghost btn-xs"
+                            title="Copy full address"
+                          >
+                            <FaExternalLinkAlt />
+                          </button>
+                          <button
+                            onClick={handleDisconnectWallet}
+                            className="btn btn-ghost btn-xs btn-error"
+                            title="Disconnect wallet"
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
                       </div>
                       <div className="badge badge-success mt-2">
-                        ✓ Verified
+                        ✓ Ready for blockchain voting
                       </div>
                     </div>
                   ) : (
                     <div>
                       <p className="text-base-content/70 mb-4">
-                        Connect your wallet to participate in blockchain voting
+                        Connect your MetaMask wallet to participate in blockchain voting
                       </p>
-                      <button className="btn btn-accent btn-block">
+                      <button 
+                        onClick={handleConnectWallet}
+                        className="btn btn-accent btn-block"
+                        disabled={isLoading}
+                      >
                         <FaWallet className="mr-2" />
-                        Connect Wallet
+                        {isLoading ? 'Connecting...' : 'Connect Wallet'}
                       </button>
+                      <div className="mt-2 text-xs text-base-content/60 flex items-center">
+                        <FaLink className="mr-1" />
+                        Supports MetaMask and other Web3 wallets
+                      </div>
                     </div>
                   )}
                 </div>

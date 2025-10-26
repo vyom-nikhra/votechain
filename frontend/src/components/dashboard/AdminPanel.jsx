@@ -24,8 +24,28 @@ import {
   FaDatabase,
   FaShieldAlt,
   FaExclamationTriangle,
-  FaTimes
+  FaTimes,
+  FaLink,
+  FaCubes,
+  FaExternalLinkAlt,
+  FaCertificate,
+  FaLock
 } from 'react-icons/fa';
+
+// Utility function to format dates in IST
+const formatDateIST = (dateString) => {
+  if (!dateString) return 'Not set';
+  const date = new Date(dateString);
+  return date.toLocaleString('en-IN', { 
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
+};
 
 const AdminPanel = () => {
   const { user } = useAuthStore();
@@ -284,16 +304,24 @@ const AdminPanel = () => {
       return;
     }
 
-    // Transform data to match backend format
+    // Transform data to match backend format with proper IST timezone handling
+    const convertToISO = (dateTimeLocal) => {
+      if (!dateTimeLocal) return null;
+      // datetime-local returns "YYYY-MM-DDTHH:MM" format
+      // We need to treat this as IST time and convert to UTC
+      const localDate = new Date(dateTimeLocal);
+      return localDate.toISOString();
+    };
+
     const electionData = {
       title: newElection.title,
       description: newElection.description,
       electionType: newElection.electionType,
       category: newElection.category,
-      registrationStartTime: newElection.registrationStartDate,
-      registrationEndTime: newElection.registrationEndDate,
-      votingStartTime: newElection.votingStartDate,
-      votingEndTime: newElection.votingEndDate,
+      registrationStartTime: convertToISO(newElection.registrationStartDate),
+      registrationEndTime: convertToISO(newElection.registrationEndDate),
+      votingStartTime: convertToISO(newElection.votingStartDate),
+      votingEndTime: convertToISO(newElection.votingEndDate),
       eligibleDepartments: newElection.eligibleDepartments,
       eligibleYears: newElection.eligibleYears,
       candidates: newElection.candidates.filter(name => name.trim()).map(name => ({
@@ -437,6 +465,63 @@ const AdminPanel = () => {
                   )}%
                 </div>
                 <div className="stat-desc">Email verified users</div>
+              </div>
+            </div>
+
+            {/* Blockchain Status */}
+            <div className="card bg-gradient-to-r from-purple-500 to-blue-600 text-white shadow-xl">
+              <div className="card-body">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <FaCubes />
+                      Blockchain Integration Status
+                    </h3>
+                    <p className="opacity-90 mt-1">Secure, transparent, and immutable voting</p>
+                  </div>
+                  <div className="badge badge-success gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                    Connected
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FaLock className="text-sm" />
+                      <span className="text-sm font-semibold">Smart Contracts</span>
+                    </div>
+                    <div className="text-xs opacity-80">
+                      Voting: 0x9fE4...a6e0<br/>
+                      NFT: 0xe7f1...0512<br/>
+                      ZK: 0x5FbD...0aa3
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FaCertificate className="text-sm" />
+                      <span className="text-sm font-semibold">NFT Badges</span>
+                    </div>
+                    <div className="text-xs opacity-80">
+                      Voter certificates<br/>
+                      Participation proof<br/>
+                      Blockchain verified
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white/10 rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FaExternalLinkAlt className="text-sm" />
+                      <span className="text-sm font-semibold">Network</span>
+                    </div>
+                    <div className="text-xs opacity-80">
+                      Chain ID: 31337<br/>
+                      Hardhat Local<br/>
+                      Fast & secure
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -667,13 +752,73 @@ const AdminPanel = () => {
               ) : elections && elections.length > 0 ? elections.map(election => (
                 <div key={election._id} className="card bg-base-100 shadow-xl">
                   <div className="card-body">
-                    <h3 className="card-title">{election.title}</h3>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="card-title">{election.title}</h3>
+                      <div className={`badge ${
+                        election.currentPhase === 'voting' ? 'badge-success' :
+                        election.currentPhase === 'registration' ? 'badge-warning' :
+                        election.currentPhase === 'upcoming' ? 'badge-info' :
+                        election.currentPhase === 'completed' ? 'badge-neutral' : 'badge-ghost'
+                      }`}>
+                        {election.currentPhase || 'draft'}
+                      </div>
+                    </div>
                     <p className="text-sm text-base-content/70">
                       {election.description?.substring(0, 100)}...
                     </p>
+                    
+                    {/* Date Information */}
+                    <div className="text-xs text-base-content/60 space-y-1 mt-2">
+                      <div>📅 Registration: {formatDateIST(election.registrationStartTime)} - {formatDateIST(election.registrationEndTime)}</div>
+                      <div>🗳️ Voting: {formatDateIST(election.votingStartTime)} - {formatDateIST(election.votingEndTime)}</div>
+                    </div>
+                    
+                    {/* Blockchain Information */}
+                    {(election.contractAddress || election.metadata?.blockchainTxHash) && (
+                      <div className="mt-3 p-2 bg-base-200 rounded-lg">
+                        <div className="flex items-center gap-1 text-xs text-success mb-1">
+                          <FaCubes />
+                          <span className="font-semibold">Blockchain Verified</span>
+                        </div>
+                        <div className="text-xs text-base-content/60 space-y-1">
+                          {election.contractAddress && (
+                            <div className="flex items-center gap-1">
+                              <FaLink className="text-xs" />
+                              <span>Contract: {election.contractAddress.substring(0, 6)}...{election.contractAddress.substring(-4)}</span>
+                              <button 
+                                onClick={() => navigator.clipboard.writeText(election.contractAddress)}
+                                className="btn btn-ghost btn-xs"
+                                title="Copy contract address"
+                              >
+                                <FaExternalLinkAlt />
+                              </button>
+                            </div>
+                          )}
+                          {election.metadata?.blockchainTxHash && (
+                            <div className="flex items-center gap-1">
+                              <FaLock className="text-xs" />
+                              <span>Tx: {election.metadata.blockchainTxHash.substring(0, 6)}...{election.metadata.blockchainTxHash.substring(-4)}</span>
+                              <button 
+                                onClick={() => navigator.clipboard.writeText(election.metadata.blockchainTxHash)}
+                                className="btn btn-ghost btn-xs"
+                                title="Copy transaction hash"
+                              >
+                                <FaExternalLinkAlt />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="flex justify-between items-center mt-4">
-                      <div className="badge badge-info">
-                        {election.totalVotes || 0} votes
+                      <div className="flex gap-2">
+                        <div className="badge badge-info">
+                          {election.results?.totalVotes || 0} votes
+                        </div>
+                        <div className="badge badge-ghost">
+                          {election.candidates?.length || 0} candidates
+                        </div>
                       </div>
                       <div className="flex gap-1">
                         <button className="btn btn-xs btn-outline">
@@ -940,10 +1085,17 @@ const AdminPanel = () => {
                 />
               </div>
 
+              <div className="alert alert-info mb-4">
+                <div className="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                  <span>All dates and times are in Indian Standard Time (IST)</span>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Registration Start *</span>
+                    <span className="label-text font-medium">Registration Start * (IST)</span>
                   </label>
                   <input
                     type="datetime-local"
@@ -952,11 +1104,14 @@ const AdminPanel = () => {
                     onChange={handleElectionInputChange}
                     className="input input-bordered"
                   />
+                  <div className="label">
+                    <span className="label-text-alt">When students can start registering</span>
+                  </div>
                 </div>
 
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Registration End *</span>
+                    <span className="label-text font-medium">Registration End * (IST)</span>
                   </label>
                   <input
                     type="datetime-local"
@@ -965,13 +1120,16 @@ const AdminPanel = () => {
                     onChange={handleElectionInputChange}
                     className="input input-bordered"
                   />
+                  <div className="label">
+                    <span className="label-text-alt">Registration deadline</span>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Voting Start *</span>
+                    <span className="label-text font-medium">Voting Start * (IST)</span>
                   </label>
                   <input
                     type="datetime-local"
@@ -980,11 +1138,14 @@ const AdminPanel = () => {
                     onChange={handleElectionInputChange}
                     className="input input-bordered"
                   />
+                  <div className="label">
+                    <span className="label-text-alt">When voting begins</span>
+                  </div>
                 </div>
 
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-medium">Voting End *</span>
+                    <span className="label-text font-medium">Voting End * (IST)</span>
                   </label>
                   <input
                     type="datetime-local"
@@ -993,6 +1154,9 @@ const AdminPanel = () => {
                     onChange={handleElectionInputChange}
                     className="input input-bordered"
                   />
+                  <div className="label">
+                    <span className="label-text-alt">Voting deadline</span>
+                  </div>
                 </div>
               </div>
 

@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { analyticsAPI, electionsAPI } from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
+import walletService from '../../services/walletService';
+import toast from 'react-hot-toast';
 import { 
   FaUser, 
   FaVoteYea, 
@@ -38,6 +40,25 @@ const Dashboard = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const handleConnectWallet = async () => {
+    try {
+      if (!walletService.isMetaMaskAvailable()) {
+        toast.error('MetaMask is not installed. Please install MetaMask to connect your wallet.');
+        window.open('https://metamask.io/download/', '_blank');
+        return;
+      }
+
+      const result = await walletService.connectWallet();
+      
+      if (result.success) {
+        toast.success('Wallet connected! Please update your profile to save the wallet address.');
+        navigate('/profile');
+      }
+    } catch (error) {
+      toast.error(error.message || 'Failed to connect wallet');
+    }
   };
 
   const getElectionStatus = (election) => {
@@ -314,7 +335,10 @@ const Dashboard = () => {
             
             {!user?.walletAddress && (
               <div className="mt-4">
-                <button className="btn btn-accent">
+                <button 
+                  onClick={handleConnectWallet}
+                  className="btn btn-accent"
+                >
                   <FaWallet className="mr-2" />
                   Connect Wallet
                 </button>
