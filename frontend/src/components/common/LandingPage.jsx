@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import { 
   FaVoteYea, 
   FaShieldAlt, 
@@ -9,24 +9,40 @@ import {
   FaArrowRight, 
   FaPlay,
   FaBolt,
-  FaTrophy,
-  FaEye,
   FaLock,
   FaGlobe,
   FaMobile,
   FaCheckCircle,
+  FaRocket,
   FaStar,
-  FaQuoteLeft,
-  FaGraduationCap,
-  FaUserTie,
-  FaCode,
-  FaRocket
+  FaQuoteLeft
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi2';
+import { cn } from '../../lib/utils';
+import BlurryBlob from '../animata/background/blurry-blob';
+import SkewButton from '../ui/SkewButton';
+import { BentoGrid, BentoCard } from '../animata/bento-grid/Gradient';
+import ClickSpark from '../ui/ClickSpark';
+import { PointerHighlight } from '../ui/PointerHighlight';
+import Marquee from '../ui/Marquee';
+import { Globe } from '../ui/Globe';
+import FlipCard from '../animata/card/flip-card';
 
 const LandingPage = () => {
   const [currentFeature, setCurrentFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const navRef = useRef(null);
+
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 100) {
+      setIsScrolled(true);
+    } else {
+      setIsScrolled(false);
+    }
+  });
 
   const features = [
     {
@@ -37,7 +53,7 @@ const LandingPage = () => {
       badge: "🛡️ Secure"
     },
     {
-      icon: <FaEye className="text-5xl text-info" />,
+      icon: <FaChartLine className="text-5xl text-info" />,
       title: "Real-time Transparency", 
       description: "Watch live voting results, analytics, and participation metrics in real-time dashboards",
       color: "info",
@@ -51,11 +67,11 @@ const LandingPage = () => {
       badge: "🗳️ Democratic"
     },
     {
-      icon: <FaTrophy className="text-5xl text-error" />,
-      title: "NFT Achievement System",
-      description: "Earn unique digital badges, certificates, and rewards for active civic participation",
+      icon: <FaRocket className="text-5xl text-error" />,
+      title: "Lightning Fast Results",
+      description: "Get instant election results and real-time updates for active civic participation",
       color: "error",
-      badge: "🏆 Rewarding"
+      badge: "⚡ Fast"
     }
   ];
 
@@ -63,7 +79,7 @@ const LandingPage = () => {
     { number: "99.9%", label: "Uptime Guarantee", icon: <FaGlobe />, desc: "Always available" },
     { number: "256-bit", label: "Encryption", icon: <FaLock />, desc: "Military grade" },
     { number: "<0.1s", label: "Vote Processing", icon: <FaBolt />, desc: "Lightning fast" },
-    { number: "100%", label: "Transparency", icon: <FaEye />, desc: "Fully auditable" }
+    { number: "100%", label: "Transparency", icon: <FaCheckCircle />, desc: "Fully auditable" }
   ];
 
   const testimonials = [
@@ -93,34 +109,6 @@ const LandingPage = () => {
     }
   ];
 
-  const pricingPlans = [
-    {
-      name: "Student",
-      price: "Free",
-      description: "Perfect for individual student participation",
-      features: ["Vote in elections", "View live results", "Basic analytics", "NFT badges"],
-      color: "primary",
-      popular: false
-    },
-    {
-      name: "University", 
-      price: "$99",
-      period: "/month",
-      description: "Complete solution for educational institutions",
-      features: ["Unlimited elections", "Advanced analytics", "Custom branding", "24/7 support", "API access", "Bulk NFT rewards"],
-      color: "secondary",
-      popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      description: "Tailored solutions for large organizations",
-      features: ["Everything in University", "Custom integrations", "Dedicated support", "SLA guarantees", "White-label options"],
-      color: "accent",
-      popular: false
-    }
-  ];
-
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentFeature((prev) => (prev + 1) % features.length);
@@ -133,58 +121,92 @@ const LandingPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300">
+    <>
       {/* Navigation */}
-      <div className="navbar bg-base-100/80 backdrop-blur-md px-4 lg:px-8 border-b border-base-300/50 sticky top-0 z-50">
-        <div className="navbar-start">
-          <motion.div 
-            className="flex items-center space-x-3"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="avatar">
-              <div className="w-12 rounded-xl bg-gradient-to-r from-primary to-secondary p-2">
-                <FaVoteYea className="text-2xl text-white" />
+      <nav 
+        ref={navRef}
+        className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ 
+            opacity: 1,
+            y: 0,
+          }}
+          transition={{
+            duration: 0.6,
+            ease: "easeOut"
+          }}
+          style={{
+            backdropFilter: "blur(16px) saturate(180%)",
+            backgroundColor: "rgba(15, 23, 42, 0.7)",
+            boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 0 1px rgba(255, 255, 255, 0.08) inset",
+            borderRadius: "9999px",
+            padding: "0.9rem 2rem",
+          }}
+          className="navbar px-4 lg:px-8 border border-white/10 w-full max-w-[1200px] pointer-events-auto"
+        >
+          <div className="navbar-start">
+            <motion.div 
+              className="flex items-center space-x-3"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="avatar">
+                <div className="rounded-xl bg-gradient-to-r from-primary to-secondary p-2 w-10">
+                  <FaVoteYea className="text-white text-xl" />
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col">
-              <div className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                VoteChain
+              <div className="flex flex-col">
+                <div className="text-xl font-black bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  VoteChain
+                </div>
               </div>
-              <div className="text-xs text-base-content/60 -mt-1">Secure Democracy</div>
-            </div>
-          </motion.div>
-        </div>
-        
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 space-x-2">
-            <li><a className="btn btn-ghost btn-sm">Features</a></li>
-            <li><a className="btn btn-ghost btn-sm">Pricing</a></li>
-            <li><a className="btn btn-ghost btn-sm">About</a></li>
-            <li><a className="btn btn-ghost btn-sm">Contact</a></li>
-          </ul>
-        </div>
-        
-        <div className="navbar-end space-x-2">
-          <Link to="/login" className="btn btn-ghost">
-            <FaLock className="mr-2" />
-            Sign In
-          </Link>
-          <Link to="/register" className="btn btn-primary btn-gradient shadow-lg">
-            <FaRocket className="mr-2" />
-            Get Started
-            <FaArrowRight className="ml-2" />
-          </Link>
-        </div>
-      </div>
+            </motion.div>
+          </div>
+          
+          <div className="navbar-center hidden lg:flex">
+            <ul className="menu menu-horizontal px-1 space-x-2">
+              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">Features</a></li>
+              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">Pricing</a></li>
+              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">About</a></li>
+              <li><a className="btn btn-xs btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">Contact</a></li>
+            </ul>
+          </div>
+          
+          <div className="navbar-end space-x-2">
+            <Link to="/login" className="btn btn-sm btn-ghost text-gray-300 hover:text-white hover:bg-gray-800">
+              <FaLock className="mr-2" />
+              Sign In
+            </Link>
+            <Link to="/register" className="btn btn-sm bg-blue-600 hover:bg-blue-700 text-white border-none shadow-lg shadow-blue-500/30">
+              <FaRocket className="mr-2" />
+              Get Started
+              <FaArrowRight className="ml-2" />
+            </Link>
+          </div>
+        </motion.div>
+      </nav>
 
+    <ClickSpark
+      sparkColor='#3b82f6'
+      sparkSize={10}
+      sparkRadius={20}
+      sparkCount={8}
+      duration={400}
+    >
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-x-hidden">
       {/* Hero Section */}
-      <section className="hero min-h-screen bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary/20 rounded-full blur-3xl"></div>
+      <section className="hero min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black relative overflow-hidden">
+        {/* BlurryBlob Background Animation */}
+        <div className="absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
+          <BlurryBlob
+            className="opacity-70"
+            firstBlobColor="bg-blue-500"
+            secondBlobColor="bg-purple-500"
+          />
+        </div>
         
         <div className="hero-content text-center max-w-7xl px-4 relative z-10">
           <motion.div
@@ -195,7 +217,7 @@ const LandingPage = () => {
           >
             {/* Badge */}
             <motion.div 
-              className="badge badge-primary badge-lg mb-6 p-4"
+              className="badge bg-blue-600/30 border-blue-500/50 text-blue-300 backdrop-blur-md badge-lg mb-6 p-4 shadow-lg"
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -205,49 +227,51 @@ const LandingPage = () => {
             </motion.div>
 
             <h1 className="text-6xl md:text-8xl font-black mb-8 leading-tight">
-              Democracy
-              <span className="block bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-gradient">
+              <span className="text-white drop-shadow-[0_4px_20px_rgba(255,255,255,0.3)]">Democracy</span>
+              <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent drop-shadow-[0_4px_20px_rgba(147,51,234,0.5)]">
                 Reimagined
-              </span>
-              <span className="block text-4xl md:text-5xl font-normal text-base-content/70 mt-4">
-                for the Digital Age
               </span>
             </h1>
             
-            <p className="text-2xl md:text-3xl mb-12 text-base-content/80 max-w-4xl mx-auto font-light leading-relaxed">
-              Experience the world's most advanced blockchain voting platform. 
-              <span className="text-primary font-semibold"> Secure, transparent, and instant</span> - 
-              the way democracy should be.
-            </p>
+            <div className="text-xl md:text-2xl mb-12 text-gray-200 max-w-3xl mx-auto font-light leading-relaxed drop-shadow-[0_2px_10px_rgba(0,0,0,0.5)]">
+              Blockchain-powered voting platform.{' '}
+              <PointerHighlight
+                rectangleClassName="border-blue-500"
+                pointerClassName="text-blue-500"
+              >
+                <span className="text-blue-300 font-semibold">Secure, transparent, and instant</span>
+              </PointerHighlight>.
+            </div>
             
             <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-12">
-              <Link to="/register" className="btn btn-primary btn-xl text-xl px-12 py-4 shadow-2xl hover:shadow-primary/25 transition-all duration-300">
-                <FaRocket className="mr-3 text-2xl" />
-                Start Your Journey
-                <FaArrowRight className="ml-3" />
+              <Link to="/register">
+                <SkewButton> 
+                  <FaRocket />
+                  Start Your Journey
+                </SkewButton>
               </Link>
-              <button className="btn btn-outline btn-xl text-xl px-12 py-4 hover:scale-105 transition-transform">
-                <FaPlay className="mr-3" />
-                Watch 2min Demo
-              </button>
+              <SkewButton as="button" className="border-white text-white">
+                <FaPlay />
+                Watch Demo
+              </SkewButton>
             </div>
 
             {/* Trust Indicators */}
-            <div className="flex flex-wrap justify-center items-center gap-8 opacity-60">
-              <div className="flex items-center gap-2 text-sm">
-                <FaCheckCircle className="text-success" />
+            <div className="flex flex-wrap justify-center items-center gap-8 opacity-70 backdrop-blur-sm">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FaCheckCircle className="text-green-500" />
                 SOC 2 Certified
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <FaCheckCircle className="text-success" />
-                99.9% Uptime SLA
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FaCheckCircle className="text-green-500" />
+                99.9% Uptime
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <FaCheckCircle className="text-success" />
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FaCheckCircle className="text-green-500" />
                 GDPR Compliant
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <FaCheckCircle className="text-success" />
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <FaCheckCircle className="text-green-500" />
                 Open Source
               </div>
             </div>
@@ -255,57 +279,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-24 bg-base-100 relative">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Trusted by the Best
-            </h2>
-            <p className="text-xl text-base-content/70">
-              Industry-leading metrics that set us apart
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={index}
-                className="card bg-gradient-to-br from-base-200 to-base-300 shadow-2xl hover:shadow-primary/20 transition-all duration-300 group"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -10 }}
-              >
-                <div className="card-body text-center p-8">
-                  <div className="flex justify-center mb-4">
-                    <div className="p-4 rounded-full bg-primary/10 text-primary text-3xl group-hover:scale-110 transition-transform">
-                      {stat.icon}
-                    </div>
-                  </div>
-                  <div className="stat-value text-4xl md:text-5xl font-black text-primary mb-2">
-                    {stat.number}
-                  </div>
-                  <div className="stat-title text-lg font-bold text-base-content mb-2">
-                    {stat.label}
-                  </div>
-                  <div className="text-sm text-base-content/60">
-                    {stat.desc}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-20 bg-base-100">
+      {/* Features Section - Bento Grid */}
+      <section className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
           <motion.div
             className="text-center mb-16"
@@ -313,72 +288,107 @@ const LandingPage = () => {
             animate={{ opacity: 1 }}
             transition={{ duration: 0.7 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
               Why Choose VoteChain?
             </h2>
-            <p className="text-xl text-base-content/70 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-400 max-w-2xl mx-auto">
               Experience the next generation of democratic participation with cutting-edge technology
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Feature Display */}
-            <motion.div 
-              className="card bg-gradient-to-br from-base-200 to-base-300 shadow-2xl"
-              key={currentFeature}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
+          <BentoGrid className="max-w-7xl mx-auto">
+            {/* Large Card - Blockchain Security */}
+            <BentoCard
+              title="Blockchain Security"
+              description="Immutable and transparent voting records secured by advanced blockchain technology. Every vote is encrypted and permanently recorded on the distributed ledger, ensuring complete auditability and preventing any tampering or manipulation."
+              icon={FaShieldAlt}
+              className="md:col-span-2 lg:row-span-2"
             >
-              <div className="card-body text-center p-12">
-                <div className="flex justify-center mb-6">
-                  {features[currentFeature].icon}
+              <div className="mt-auto pt-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-blue-400">
+                  <FaCheckCircle />
+                  <span>256-bit AES encryption</span>
                 </div>
-                <h3 className="text-2xl font-bold mb-4">
-                  {features[currentFeature].title}
-                </h3>
-                <p className="text-lg text-base-content/70">
-                  {features[currentFeature].description}
-                </p>
+                <div className="flex items-center gap-2 text-sm text-blue-400">
+                  <FaCheckCircle />
+                  <span>Tamper-proof records</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-blue-400">
+                  <FaCheckCircle />
+                  <span>Zero-knowledge proofs</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-blue-400">
+                  <FaCheckCircle />
+                  <span>Multi-signature validation</span>
+                </div>
+                <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                  <div className="text-2xl font-bold text-white">100%</div>
+                  <div className="text-xs text-gray-400">Immutable & Auditable</div>
+                </div>
               </div>
-            </motion.div>
+            </BentoCard>
 
-            {/* Feature List */}
-            <div className="space-y-4">
-              {features.map((feature, index) => (
-                <motion.div
-                  key={index}
-                  className={`card cursor-pointer transition-all duration-300 ${
-                    index === currentFeature 
-                      ? 'bg-primary text-primary-content shadow-lg scale-105' 
-                      : 'bg-base-200 hover:bg-base-300'
-                  }`}
-                  onClick={() => setCurrentFeature(index)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="card-body flex-row items-center p-6">
-                    <div className="flex-shrink-0 mr-4">
-                      <div className={`text-2xl ${index === currentFeature ? 'text-primary-content' : 'text-primary'}`}>
-                        {feature.icon}
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-lg">{feature.title}</h4>
-                      <p className={`text-sm ${index === currentFeature ? 'text-primary-content/80' : 'text-base-content/70'}`}>
-                        {feature.description}
-                      </p>
-                    </div>
+            {/* Real-time Analytics */}
+            <BentoCard
+              title="Real-time Analytics"
+              description="Watch results pour in as they happen with live dashboards and visualizations."
+              icon={FaChartLine}
+              className="lg:col-span-1"
+            />
+
+            {/* Global Access */}
+            <BentoCard
+              title="Global Access"
+              description="Vote from anywhere in the world with our secure platform."
+              icon={FaGlobe}
+              className="lg:col-span-1"
+            />
+
+            {/* User Management */}
+            <BentoCard
+              title="Smart User Management"
+              description="Effortlessly manage voters, candidates, and administrators with our intuitive dashboard."
+              icon={FaUsers}
+              className="md:col-span-1"
+            >
+              <div className="mt-auto pt-4">
+                <div className="text-3xl font-bold text-white">10,000+</div>
+                <div className="text-sm text-gray-400">Active users</div>
+              </div>
+            </BentoCard>
+
+            {/* Mobile Responsive */}
+            <BentoCard
+              title="Mobile First"
+              description="Optimized for all devices. Vote on the go with our responsive design."
+              icon={FaMobile}
+              className="md:col-span-1"
+            />
+
+            {/* Instant Results */}
+            <BentoCard
+              title="Instant Results"
+              description="No more waiting. Get election results in seconds, not days."
+              icon={FaBolt}
+              className="md:col-span-2 lg:col-span-1"
+            >
+              <div className="mt-auto pt-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 border-2 border-gray-800"></div>
+                    ))}
                   </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+                  <span className="text-sm text-gray-400">Join 500+ organizations</span>
+                </div>
+              </div>
+            </BentoCard>
+          </BentoGrid>
         </div>
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-gradient-to-br from-base-200 to-base-300">
+      <section className="py-24 bg-gray-950 relative overflow-hidden">
         <div className="container mx-auto px-4">
           <motion.div
             className="text-center mb-16"
@@ -386,161 +396,139 @@ const LandingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Loved by Students & Universities
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+              What Our Users Say
             </h2>
-            <p className="text-xl text-base-content/70">
-              See what our community is saying
+            <p className="text-xl text-gray-400">
+              Trusted by organizations and individuals worldwide
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <Marquee repeat={12} duration={16} applyMask={false}>
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
-                className="card bg-base-100 shadow-2xl"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                whileHover={{ y: -5 }}
+                className="card bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 shadow-2xl hover:shadow-blue-500/20 transition-all duration-300 w-96 mx-4"
+                whileHover={{ y: -5, scale: 1.02 }}
               >
-                <div className="card-body p-8">
-                  <div className="flex items-center mb-6">
-                    <div className="avatar placeholder mr-4">
-                      <div className="w-16 rounded-full bg-primary/10">
-                        <span className="text-3xl">{testimonial.avatar}</span>
-                      </div>
-                    </div>
+                <div className="card-body p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="text-4xl">{testimonial.avatar}</div>
                     <div>
-                      <h4 className="font-bold text-lg">{testimonial.name}</h4>
-                      <p className="text-primary font-semibold">{testimonial.role}</p>
-                      <p className="text-sm text-base-content/60">{testimonial.university}</p>
+                      <h3 className="font-bold text-white text-lg">{testimonial.name}</h3>
+                      <p className="text-sm text-gray-400">{testimonial.role}</p>
+                      <p className="text-sm text-blue-400">{testimonial.university}</p>
                     </div>
                   </div>
                   
-                  <div className="flex mb-4">
+                  <div className="flex gap-1 mb-3">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <FaStar key={i} className="text-warning text-lg" />
+                      <FaStar key={i} className="text-yellow-400 text-sm" />
                     ))}
                   </div>
-                  
+
                   <div className="relative">
-                    <FaQuoteLeft className="text-primary/20 text-4xl absolute -top-2 -left-2" />
-                    <p className="text-base-content/80 italic leading-relaxed pl-8">
-                      "{testimonial.content}"
-                    </p>
+                    <FaQuoteLeft className="absolute -top-2 -left-2 text-blue-500/20 text-2xl" />
+                    <p className="text-gray-300 pl-6 italic">{testimonial.content}</p>
                   </div>
                 </div>
               </motion.div>
             ))}
-          </div>
+          </Marquee>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-24 bg-base-100">
-        <div className="container mx-auto px-4">
+      {/* CTA Section - Ready to Transform */}
+      <section className="relative overflow-hidden bg-gray-950">
+        {/* Main CTA Grid */}
+        <div className="container mx-auto px-4 py-20">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Choose Your Plan
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white">
+              Ready to Transform Democracy?
             </h2>
-            <p className="text-xl text-base-content/70">
-              Flexible pricing for every organization size
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Join thousands of organizations worldwide using VoteChain for secure, transparent voting
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <motion.div
-                key={index}
-                className={`card shadow-2xl relative ${
-                  plan.popular 
-                    ? 'bg-gradient-to-br from-primary to-secondary text-primary-content scale-105' 
-                    : 'bg-base-200 hover:bg-base-300'
-                } transition-all duration-300`}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="badge badge-accent badge-lg font-bold px-4 py-2">
-                      Most Popular
-                    </div>
-                  </div>
-                )}
-                
-                <div className="card-body p-8 text-center">
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-4xl font-black">{plan.price}</span>
-                    {plan.period && <span className="text-lg opacity-70">{plan.period}</span>}
-                  </div>
-                  <p className={`mb-8 ${plan.popular ? 'text-primary-content/80' : 'text-base-content/70'}`}>
-                    {plan.description}
-                  </p>
-                  
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center justify-center">
-                        <FaCheckCircle className={`mr-3 ${plan.popular ? 'text-primary-content' : 'text-success'}`} />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Link
-                    to="/register" 
-                    className={`btn btn-lg w-full ${
-                      plan.popular 
-                        ? 'btn-accent text-accent-content' 
-                        : 'btn-primary'
-                    }`}
-                  >
-                    Get Started
-                    <FaArrowRight className="ml-2" />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+            {/* FlipCard Demo */}
+            <motion.div
+              className="flex justify-center items-center"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <FlipCard
+                image="https://plus.unsplash.com/premium_photo-1733342554594-102b8e2d0623?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2031"
+                title="VoteChain"
+                subtitle="About VoteChain"
+                description="VoteChain is a revolutionary blockchain-powered voting platform that brings democracy into the digital age. Built with cutting-edge technology, VoteChain ensures every vote is secure, transparent, and instantly verifiable. Our platform combines military-grade encryption with the immutability of blockchain to create a voting system you can trust."
+                rotate="y"
+                className="h-[400px] w-full max-w-sm shadow-2xl hover:shadow-blue-500/30 transition-shadow duration-300"
+              />
+            </motion.div>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-r from-primary via-secondary to-accent relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="container mx-auto px-4 text-center relative z-10">
+            {/* Globe Card */}
+            <motion.div
+              className="relative flex flex-col h-[400px] bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-2xl hover:shadow-blue-500/20 transition-all duration-300"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              whileHover={{ y: -5 }}
+            >
+              <div className="p-6 z-10">
+                <h3 className="text-2xl font-bold text-white mb-2">Global Reach</h3>
+                <p className="text-gray-400 text-sm">
+                  Trusted by universities and organizations across 50+ countries
+                </p>
+              </div>
+              
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Globe className="absolute -right-10 md:-right-20 -bottom-32 md:-bottom-40 opacity-80" />
+              </div>
+
+              <div className="absolute bottom-6 left-6 right-6 z-10">
+                <div className="flex items-center justify-between text-sm text-gray-400 bg-gray-900/80 backdrop-blur-sm p-4 rounded-lg border border-gray-700">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
+                    <span>Live worldwide</span>
+                  </div>
+                  <div className="text-white font-semibold">500+ Active Locations</div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* CTA Buttons */}
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            className="mt-16 text-center"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
           >
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-6">
-              Ready to Transform Democracy?
-            </h2>
-            <p className="text-2xl text-white/90 mb-12 max-w-3xl mx-auto">
-              Join the revolution. Start your secure voting journey today and be part of the future of democratic participation.
-            </p>
-            <div className="flex flex-col lg:flex-row gap-6 justify-center items-center">
-              <Link to="/register" className="btn btn-accent btn-xl text-xl px-12 py-4 shadow-2xl hover:shadow-accent/25 transition-all duration-300">
-                <FaRocket className="mr-3 text-2xl" />
-                Create Free Account
-                <FaArrowRight className="ml-3" />
+            <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-8">
+              <Link to="/register" className="inline-block">
+                <SkewButton className="bg-blue-600 text-white border-blue-600">
+                  <FaRocket />
+                  Create Free Account
+                  <FaArrowRight />
+                </SkewButton>
               </Link>
-              <Link to="/login" className="btn btn-outline btn-xl text-xl px-12 py-4 text-white border-white hover:bg-white hover:text-primary transition-all duration-300">
-                <FaLock className="mr-3" />
-                Sign In Now
+              <Link to="/login" className="inline-block">
+                <SkewButton className="border-gray-600 text-gray-300 hover:border-blue-500 hover:text-white">
+                  <FaLock />
+                  Sign In Now
+                </SkewButton>
               </Link>
             </div>
             
-            <div className="mt-12 text-white/70">
+            <div className="text-gray-500">
               <p className="text-sm">
                 ✨ No credit card required • 🔒 Setup in under 2 minutes • 🎯 Cancel anytime
               </p>
@@ -550,23 +538,99 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="footer footer-center p-10 bg-base-200 text-base-content">
-        <aside>
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="avatar placeholder">
-              <div className="bg-gradient-to-r from-primary to-secondary text-white rounded-xl w-12 h-12">
-                <FaVoteYea className="text-2xl" />
+      <footer className="bg-gray-950 border-t border-gray-800">
+        <div className="container mx-auto px-4 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            {/* Brand Column */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl w-12 h-12 flex items-center justify-center">
+                  <FaVoteYea className="text-2xl" />
+                </div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  VoteChain
+                </div>
+              </div>
+              <p className="text-gray-400 leading-relaxed">
+                Revolutionizing democracy through blockchain technology. Secure, transparent, and instant voting for the digital age.
+              </p>
+              <div className="flex space-x-4">
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  <FaGlobe className="text-xl" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  <FaUsers className="text-xl" />
+                </a>
+                <a href="#" className="text-gray-400 hover:text-blue-400 transition-colors">
+                  <FaShieldAlt className="text-xl" />
+                </a>
               </div>
             </div>
-            <div className="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              VoteChain
+
+            {/* Product Column */}
+            <div>
+              <h3 className="text-white font-bold text-lg mb-4">Product</h3>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Features</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Security</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Roadmap</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">API Docs</a></li>
+              </ul>
+            </div>
+
+            {/* Company Column */}
+            <div>
+              <h3 className="text-white font-bold text-lg mb-4">Company</h3>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Partners</a></li>
+              </ul>
+            </div>
+
+            {/* Legal Column */}
+            <div>
+              <h3 className="text-white font-bold text-lg mb-4">Legal</h3>
+              <ul className="space-y-3">
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">GDPR</a></li>
+                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Compliance</a></li>
+              </ul>
             </div>
           </div>
-          <p className="font-medium">Revolutionizing democracy through blockchain technology</p>
-          <p>Copyright © 2024 - All rights reserved</p>
-        </aside>
+
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-gray-800">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <div className="text-gray-500 text-sm">
+                © 2024 VoteChain. All rights reserved.
+              </div>
+              <div className="flex items-center space-x-6 text-sm">
+                <div className="flex items-center gap-2 text-gray-400">
+                  <FaCheckCircle className="text-green-500" />
+                  <span>SOC 2 Certified</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <FaCheckCircle className="text-green-500" />
+                  <span>GDPR Compliant</span>
+                </div>
+                <div className="flex items-center gap-2 text-gray-400">
+                  <FaCheckCircle className="text-green-500" />
+                  <span>99.9% Uptime</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </footer>
     </div>
+    </ClickSpark>
+    </>
   );
 };
 
