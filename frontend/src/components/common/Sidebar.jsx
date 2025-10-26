@@ -33,12 +33,7 @@ const Sidebar = () => {
       icon: <MdHowToVote className="text-xl" />,
       description: 'Browse & Vote'
     },
-    {
-      path: '/blockchain',
-      name: 'Blockchain',
-      icon: <FaCubes className="text-xl" />,
-      description: 'NFTs & Explorer'
-    },
+  
     {
       path: '/profile',
       name: 'Profile',
