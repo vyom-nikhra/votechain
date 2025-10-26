@@ -85,6 +85,19 @@ const useAuthStore = create(
 
       clearError: () => set({ error: null }),
 
+      // Refresh user data
+      refreshUser: async () => {
+        try {
+          const response = await authAPI.getProfile();
+          const { user } = response.data;
+          set({ user });
+          return { success: true };
+        } catch (error) {
+          console.error('Failed to refresh user data:', error);
+          return { success: false };
+        }
+      },
+
       // Initialize auth from token
       initializeAuth: async () => {
         const { token } = get();

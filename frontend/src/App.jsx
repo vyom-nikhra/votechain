@@ -21,6 +21,7 @@ import ElectionsList from './components/voting/ElectionsList';
 import VotingPage from './components/voting/VotingPage';
 import AdminPanel from './components/dashboard/AdminPanel';
 import ProfilePage from './components/dashboard/ProfilePage';
+import BlockchainExplorer from './components/blockchain/BlockchainExplorer';
 
 // Hooks and Store
 import { useAuthStore } from './store/authStore';
@@ -97,6 +98,11 @@ function App() {
                     <Route path="/profile" element={
                       <ProtectedRoute>
                         <ProfilePage />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/blockchain" element={
+                      <ProtectedRoute>
+                        <BlockchainExplorer />
                       </ProtectedRoute>
                     } />
                   </Routes>

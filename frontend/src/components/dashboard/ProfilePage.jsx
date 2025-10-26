@@ -20,7 +20,8 @@ import {
   FaHistory,
   FaShieldAlt,
   FaLink,
-  FaExternalLinkAlt
+  FaExternalLinkAlt,
+  FaCertificate
 } from 'react-icons/fa';
 
 const ProfilePage = () => {
@@ -53,6 +54,10 @@ const ProfilePage = () => {
     joinedDate: '',
     lastLogin: ''
   });
+
+  const [showNFTModal, setShowNFTModal] = useState(false);
+  const [blockchainNFTs, setBlockchainNFTs] = useState([]);
+  const [loadingNFTs, setLoadingNFTs] = useState(false);
 
   // Initialize profile data when user changes
   useEffect(() => {
@@ -184,6 +189,29 @@ const ProfilePage = () => {
     if (user?.walletAddress) {
       navigator.clipboard.writeText(user.walletAddress);
       toast.success('Wallet address copied to clipboard!');
+    }
+  };
+
+  const fetchBlockchainNFTs = async () => {
+    if (!user?.walletAddress) {
+      toast.error('No wallet connected. Please connect your wallet first.');
+      return;
+    }
+
+    setLoadingNFTs(true);
+    try {
+      const result = await walletService.getUserNFTs(user.walletAddress);
+      if (result.success) {
+        setBlockchainNFTs(result.nfts);
+        setShowNFTModal(true);
+        toast.success(`Found ${result.count} NFT badges on blockchain!`);
+      } else {
+        toast.error('Failed to fetch NFTs from blockchain: ' + result.error);
+      }
+    } catch (error) {
+      toast.error('Error connecting to blockchain: ' + error.message);
+    } finally {
+      setLoadingNFTs(false);
     }
   };
 
@@ -639,8 +667,16 @@ const ProfilePage = () => {
                     <FaHistory className="mr-2" />
                     View Vote History
                   </button>
-                  <button className="btn btn-outline btn-block">
-                    <FaTrophy className="mr-2" />
+                  <button 
+                    className="btn btn-outline btn-block"
+                    onClick={fetchBlockchainNFTs}
+                    disabled={loadingNFTs || !user?.walletAddress}
+                  >
+                    {loadingNFTs ? (
+                      <span className="loading loading-spinner mr-2"></span>
+                    ) : (
+                      <FaTrophy className="mr-2" />
+                    )}
                     My NFT Collection
                   </button>
                   <button className="btn btn-outline btn-block">
@@ -653,6 +689,96 @@ const ProfilePage = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* NFT Collection Modal */}
+      {showNFTModal && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-4xl">
+            <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+              <FaTrophy className="text-warning" />
+              My NFT Collection
+              <div className="badge badge-primary ml-2">{blockchainNFTs.length} NFTs</div>
+            </h3>
+
+            <div className="tabs tabs-boxed mb-4">
+              <a className="tab tab-active">Blockchain NFTs</a>
+              <a className="tab">Database Records</a>
+            </div>
+
+            {blockchainNFTs.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {blockchainNFTs.map((nft, index) => (
+                  <div key={nft.tokenId} className="card bg-gradient-to-br from-primary/10 to-secondary/10 border border-primary/20">
+                    <div className="card-body p-4">
+                      <h4 className="font-bold flex items-center gap-2">
+                        <FaCertificate className="text-success" />
+                        Voting NFT #{nft.tokenId}
+                      </h4>
+                      <div className="text-sm space-y-1">
+                        <div>
+                          <span className="opacity-70">Type:</span> {nft.type}
+                        </div>
+                        <div>
+                          <span className="opacity-70">Token ID:</span> 
+                          <code className="bg-base-300 px-1 ml-1 rounded">{nft.tokenId}</code>
+                        </div>
+                        <div>
+                          <span className="opacity-70">Contract:</span>
+                          <code className="bg-base-300 px-1 ml-1 rounded text-xs">
+                            {nft.contractAddress.substring(0, 10)}...
+                          </code>
+                        </div>
+                      </div>
+                      <div className="card-actions justify-end mt-2">
+                        <div className="badge badge-success badge-sm">Minted</div>
+                        <div className="badge badge-outline badge-sm">On-Chain</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FaTrophy className="text-6xl opacity-30 mx-auto mb-4" />
+                <p className="text-lg font-medium">No NFTs Found</p>
+                <p className="text-sm opacity-70">Vote in elections to earn NFT badges!</p>
+              </div>
+            )}
+
+            {/* Database NFTs for comparison */}
+            {user?.nftBadges && user.nftBadges.length > 0 && (
+              <div className="mt-6">
+                <h4 className="font-semibold mb-2">Database Records ({user.nftBadges.length})</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {user.nftBadges.map((badge, index) => (
+                    <div key={index} className="bg-base-200 p-3 rounded-lg text-sm">
+                      <div>Election: {badge.electionId}</div>
+                      <div>Type: {badge.badgeType}</div>
+                      <div>Minted: {new Date(badge.mintedAt).toLocaleDateString()}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="modal-action">
+              <button 
+                className="btn btn-primary"
+                onClick={() => window.open(`https://localhost:8545`, '_blank')}
+              >
+                <FaExternalLinkAlt className="mr-2" />
+                View on Block Explorer
+              </button>
+              <button 
+                className="btn"
+                onClick={() => setShowNFTModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

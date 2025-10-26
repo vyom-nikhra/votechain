@@ -8,6 +8,7 @@ import {
   MdAdminPanelSettings,
   MdAccountBalanceWallet 
 } from 'react-icons/md';
+import { FaCubes } from 'react-icons/fa';
 
 const Sidebar = () => {
   const { user, isAdmin } = useAuthStore();
@@ -24,6 +25,12 @@ const Sidebar = () => {
       name: 'Elections',
       icon: <MdHowToVote className="text-xl" />,
       description: 'Browse & Vote'
+    },
+    {
+      path: '/blockchain',
+      name: 'Blockchain',
+      icon: <FaCubes className="text-xl" />,
+      description: 'NFTs & Explorer'
     },
     {
       path: '/profile',

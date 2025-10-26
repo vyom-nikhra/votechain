@@ -201,6 +201,108 @@ class WalletService {
       return { connected: false, error: error.message };
     }
   }
+
+  // Get NFTs from blockchain
+  async getUserNFTs(userAddress) {
+    if (!this.provider) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      // NFT Contract address (from deployment file)
+      const NFT_CONTRACT_ADDRESS = '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512'; // VotingNFT contract
+      
+      // ERC-721 ABI for balance and tokenOfOwnerByIndex functions
+      const ERC721_ABI = [
+        "function balanceOf(address owner) view returns (uint256)",
+        "function tokenOfOwnerByIndex(address owner, uint256 index) view returns (uint256)",
+        "function tokenURI(uint256 tokenId) view returns (string)",
+        "function ownerOf(uint256 tokenId) view returns (address)"
+      ];
+
+      // Create ethers provider
+      const { ethers } = await import('ethers');
+      const provider = new ethers.providers.Web3Provider(this.provider);
+      const contract = new ethers.Contract(NFT_CONTRACT_ADDRESS, ERC721_ABI, provider);
+
+      // Get number of NFTs owned by user
+      const balance = await contract.balanceOf(userAddress);
+      const nftCount = balance.toNumber();
+
+      const nfts = [];
+      
+      // Get each NFT token ID and metadata
+      for (let i = 0; i < nftCount; i++) {
+        const tokenId = await contract.tokenOfOwnerByIndex(userAddress, i);
+        
+        try {
+          const tokenURI = await contract.tokenURI(tokenId);
+          nfts.push({
+            tokenId: tokenId.toString(),
+            tokenURI,
+            contractAddress: NFT_CONTRACT_ADDRESS,
+            type: 'Voting NFT Badge'
+          });
+        } catch (error) {
+          console.warn(`Could not fetch metadata for token ${tokenId}:`, error);
+          nfts.push({
+            tokenId: tokenId.toString(),
+            tokenURI: null,
+            contractAddress: NFT_CONTRACT_ADDRESS,
+            type: 'Voting NFT Badge'
+          });
+        }
+      }
+
+      return {
+        success: true,
+        nfts,
+        count: nftCount
+      };
+    } catch (error) {
+      console.error('Error fetching NFTs:', error);
+      return {
+        success: false,
+        error: error.message,
+        nfts: [],
+        count: 0
+      };
+    }
+  }
+
+  // Get NFT details from blockchain
+  async getNFTDetails(tokenId, contractAddress) {
+    if (!this.provider) {
+      throw new Error('Wallet not connected');
+    }
+
+    try {
+      const ERC721_ABI = [
+        "function tokenURI(uint256 tokenId) view returns (string)",
+        "function ownerOf(uint256 tokenId) view returns (address)"
+      ];
+
+      const { ethers } = await import('ethers');
+      const provider = new ethers.providers.Web3Provider(this.provider);
+      const contract = new ethers.Contract(contractAddress, ERC721_ABI, provider);
+
+      const tokenURI = await contract.tokenURI(tokenId);
+      const owner = await contract.ownerOf(tokenId);
+
+      return {
+        success: true,
+        tokenId,
+        tokenURI,
+        owner,
+        contractAddress
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
 }
 
 // Create singleton instance
