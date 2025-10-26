@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
 import { 
   FaVoteYea, 
   FaShieldAlt, 
@@ -23,10 +23,25 @@ import {
   FaRocket
 } from 'react-icons/fa';
 import { HiSparkles } from 'react-icons/hi2';
+import { cn } from '../../lib/utils';
+import Marquee from '../ui/Marquee';
+import AnimatedButton from '../ui/AnimatedButton';
 
 const LandingPage = () => {
   const [currentFeature, setCurrentFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const navRef = useRef(null);
+
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, "change", (latest) => {
+    if (latest > 100) {
+      setIsScrolled(true);
+    } else {
+      setIsScrolled(false);
+    }
+  });
 
   const features = [
     {
@@ -135,49 +150,96 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-base-100 via-base-200 to-base-300">
       {/* Navigation */}
-      <div className="navbar bg-base-100/80 backdrop-blur-md px-4 lg:px-8 border-b border-base-300/50 sticky top-0 z-50">
-        <div className="navbar-start">
-          <motion.div 
-            className="flex items-center space-x-3"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="avatar">
-              <div className="w-12 rounded-xl bg-gradient-to-r from-primary to-secondary p-2">
-                <FaVoteYea className="text-2xl text-white" />
+      <motion.nav 
+        ref={navRef}
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45 }}
+        className={cn(
+          "sticky top-0 z-50 transition-all duration-300"
+        )}
+      >
+        <motion.div
+          animate={{
+            backdropFilter: isScrolled ? "blur(10px)" : "blur(4px)",
+            boxShadow: isScrolled
+              ? "0 0 24px rgba(34, 42, 53, 0.06), 0 1px 1px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(34, 42, 53, 0.04), 0 0 4px rgba(34, 42, 53, 0.08), 0 16px 68px rgba(47, 48, 55, 0.05), 0 1px 0 rgba(255, 255, 255, 0.1) inset"
+              : "none",
+            maxWidth: isScrolled ? "1200px" : "100%",
+            margin: isScrolled ? "1.75rem auto" : "0",
+            borderRadius: isScrolled ? "9999px" : "0",
+            padding: isScrolled ? "0.9rem 2rem" : "1rem 2rem",
+            y: isScrolled ? 8 : 0
+          }}
+          transition={{
+            type: "spring",
+            stiffness: 180,
+            damping: 35,
+            duration: 0.5
+          }}
+          className={cn(
+            "navbar px-4 lg:px-8 border-b border-base-300/50",
+            isScrolled ? "bg-white/80 dark:bg-neutral-950/80" : "bg-base-100/80"
+          )}
+        >
+          <div className="navbar-start">
+            <motion.div 
+              className="flex items-center space-x-3"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="avatar">
+                <div className={cn(
+                  "rounded-xl bg-gradient-to-r from-primary to-secondary p-2 transition-all duration-300",
+                  isScrolled ? "w-10" : "w-12"
+                )}>
+                  <FaVoteYea className={cn("text-white transition-all duration-300", isScrolled ? "text-xl" : "text-2xl")} />
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col">
-              <div className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                VoteChain
+              <div className="flex flex-col">
+                <div className={cn(
+                  "font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent transition-all duration-300",
+                  isScrolled ? "text-xl" : "text-2xl"
+                )}>
+                  VoteChain
+                </div>
+                {!isScrolled && (
+                  <motion.div 
+                    className="text-xs text-base-content/60 -mt-1"
+                    initial={{ opacity: 1 }}
+                    animate={{ opacity: isScrolled ? 0 : 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    Secure Democracy
+                  </motion.div>
+                )}
               </div>
-              <div className="text-xs text-base-content/60 -mt-1">Secure Democracy</div>
-            </div>
-          </motion.div>
-        </div>
-        
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 space-x-2">
-            <li><a className="btn btn-ghost btn-sm">Features</a></li>
-            <li><a className="btn btn-ghost btn-sm">Pricing</a></li>
-            <li><a className="btn btn-ghost btn-sm">About</a></li>
-            <li><a className="btn btn-ghost btn-sm">Contact</a></li>
-          </ul>
-        </div>
-        
-        <div className="navbar-end space-x-2">
-          <Link to="/login" className="btn btn-ghost">
-            <FaLock className="mr-2" />
-            Sign In
-          </Link>
-          <Link to="/register" className="btn btn-primary btn-gradient shadow-lg">
-            <FaRocket className="mr-2" />
-            Get Started
-            <FaArrowRight className="ml-2" />
-          </Link>
-        </div>
-      </div>
+            </motion.div>
+          </div>
+          
+          <div className="navbar-center hidden lg:flex">
+            <ul className="menu menu-horizontal px-1 space-x-2">
+              <li><a className={cn("btn btn-ghost", isScrolled ? "btn-xs" : "btn-sm")}>Features</a></li>
+              <li><a className={cn("btn btn-ghost", isScrolled ? "btn-xs" : "btn-sm")}>Pricing</a></li>
+              <li><a className={cn("btn btn-ghost", isScrolled ? "btn-xs" : "btn-sm")}>About</a></li>
+              <li><a className={cn("btn btn-ghost", isScrolled ? "btn-xs" : "btn-sm")}>Contact</a></li>
+            </ul>
+          </div>
+          
+          <div className="navbar-end space-x-2">
+            <Link to="/login" className={cn("btn btn-ghost", isScrolled ? "btn-sm" : "")}>
+              <FaLock className="mr-2" />
+              Sign In
+            </Link>
+            <Link to="/register" className={cn("btn btn-primary btn-gradient shadow-lg", isScrolled ? "btn-sm" : "")}>
+              <FaRocket className="mr-2" />
+              Get Started
+              <FaArrowRight className="ml-2" />
+            </Link>
+          </div>
+        </motion.div>
+      </motion.nav>
 
       {/* Hero Section */}
       <section className="hero min-h-screen bg-gradient-to-br from-primary/10 via-secondary/5 to-accent/10 relative overflow-hidden">
@@ -221,14 +283,20 @@ const LandingPage = () => {
             </p>
             
             <div className="flex flex-col lg:flex-row gap-6 justify-center items-center mb-12">
-              <Link to="/register" className="btn btn-primary btn-xl text-xl px-12 py-4 shadow-2xl hover:shadow-primary/25 transition-all duration-300">
-                <FaRocket className="mr-3 text-2xl" />
-                Start Your Journey
-                <FaArrowRight className="ml-3" />
+              {/* Use animated button matching provided design */}
+              <Link to="/register">
+                <div className="inline-block">
+                  <AnimatedButton className="bg-primary"> 
+                    <span className="mr-3"><FaRocket /></span>
+                    Start Your Journey
+                  </AnimatedButton>
+                </div>
               </Link>
-              <button className="btn btn-outline btn-xl text-xl px-12 py-4 hover:scale-105 transition-transform">
-                <FaPlay className="mr-3" />
-                Watch 2min Demo
+              <button className="inline-block">
+                <AnimatedButton as="button" className="bg-transparent border border-white/20 text-white">
+                  <span className="mr-3"><FaPlay /></span>
+                  Watch 2min Demo
+                </AnimatedButton>
               </button>
             </div>
 
@@ -394,14 +462,12 @@ const LandingPage = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Marquee: faster, more repeats for infinite feel, remove gradient mask to avoid top dark edge */}
+          <Marquee repeat={12} className="[--duration:16s]" pauseOnHover applyMask={false}>
             {testimonials.map((testimonial, index) => (
               <motion.div
                 key={index}
-                className="card bg-base-100 shadow-2xl"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                className="card bg-base-100 shadow-2xl w-[400px] mx-4"
                 whileHover={{ y: -5 }}
               >
                 <div className="card-body p-8">
@@ -433,85 +499,11 @@ const LandingPage = () => {
                 </div>
               </motion.div>
             ))}
-          </div>
+          </Marquee>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-24 bg-base-100">
-        <div className="container mx-auto px-4">
-          <motion.div
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
-              Choose Your Plan
-            </h2>
-            <p className="text-xl text-base-content/70">
-              Flexible pricing for every organization size
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <motion.div
-                key={index}
-                className={`card shadow-2xl relative ${
-                  plan.popular 
-                    ? 'bg-gradient-to-br from-primary to-secondary text-primary-content scale-105' 
-                    : 'bg-base-200 hover:bg-base-300'
-                } transition-all duration-300`}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5 }}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                    <div className="badge badge-accent badge-lg font-bold px-4 py-2">
-                      Most Popular
-                    </div>
-                  </div>
-                )}
-                
-                <div className="card-body p-8 text-center">
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <div className="mb-4">
-                    <span className="text-4xl font-black">{plan.price}</span>
-                    {plan.period && <span className="text-lg opacity-70">{plan.period}</span>}
-                  </div>
-                  <p className={`mb-8 ${plan.popular ? 'text-primary-content/80' : 'text-base-content/70'}`}>
-                    {plan.description}
-                  </p>
-                  
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center justify-center">
-                        <FaCheckCircle className={`mr-3 ${plan.popular ? 'text-primary-content' : 'text-success'}`} />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  
-                  <Link
-                    to="/register" 
-                    className={`btn btn-lg w-full ${
-                      plan.popular 
-                        ? 'btn-accent text-accent-content' 
-                        : 'btn-primary'
-                    }`}
-                  >
-                    Get Started
-                    <FaArrowRight className="ml-2" />
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Pricing Section removed as requested */}
 
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-r from-primary via-secondary to-accent relative overflow-hidden">
